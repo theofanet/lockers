@@ -94,7 +94,6 @@ class LockersMenu(Game.Scene):
                 current_level = 0
                 for line in fp:
                     if line.startswith("level"):
-                        print(line)
                         values = line.split(" ")
                         values.pop(0)
                         values = list(map(float, values))
