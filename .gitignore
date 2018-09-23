@@ -1,7 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
 .DS_Store
-config.ini
+# config.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
