@@ -45,7 +45,7 @@ class Locker1(Game.SubScene):
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
 
-        # Game not won and timer still ok.
+        # game not won and timer still ok.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
             self._elapsed_time += App.get_time()
 
@@ -68,7 +68,7 @@ class Locker1(Game.SubScene):
                     l.rect.y += 60
                     l.position = LOCKER_DOWN
 
-                # update win position attribute.
+                # update win position attributes.
                 if l.position == self._grid.lockers_win[i]:
                     l.win_position = True
                     l.discover = True
@@ -94,7 +94,7 @@ class Locker1(Game.SubScene):
                     l.rect.y -=60
                     l.position = LOCKER_UP
 
-                # update win position attribute.
+                # update win position attributes.
                 if l.position == self._grid.lockers_win[i]:
                     l.win_position = True
                     l.discover = True
@@ -111,11 +111,15 @@ class Locker1(Game.SubScene):
                     self._grid.selected_locker = 0
 
     def draw(self, camera=None, screen=None):
-        # Game still running.
+        # game not won and timer still running.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
+            # print time left.
             self._font.draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (10, 10), (255, 0, 0))
+
+            # draw grid.
             pygame.draw.rect(App.get_display(), (255, 0, 0), self._grid, 1)
 
+            # draw lockers / footprints / selectors.
             for index in range(len(self._grid.lockers_list)):
                 locker = self._grid.lockers_list[index]
                 if locker.discover:
@@ -124,12 +128,11 @@ class Locker1(Game.SubScene):
 
                 if index == self._grid.selected_locker:
                     pygame.draw.rect(App.get_display(), (0, 0, 255), locker.selector.rect, 1)
-        else:
-            if self._state == STATE_WIN:
+        # winning case.
+        elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
                 self._font.draw_text("%.2f" % score, (10, 10), (255, 0, 0))
-                self._font.draw_text("Bobby Clark le champion", (330, 20), (255, 0, 0))
-                pygame.draw.rect(App.get_display(), (255, 0, 0), self._grid, 1)
-            else:
-                self._font.draw_text("Bob Fagget le looser", (330, 20), (255, 0, 0))
-                pygame.draw.rect(App.get_display(), (255, 0, 0), self._grid, 1)
+                self._font.draw_text("Win !", (330, 20), (255, 0, 0))
+        # loosing case.
+        else:
+            self._font.draw_text("Loose ...", (330, 20), (255, 0, 0))

@@ -29,7 +29,7 @@ class Grid:
         self.locker_win_nb = 0
         self.selected_locker = 0
 
-    def initiate_grid(self):
+    def initiate_grid(self, mixed=False):
         # set locker and selector modifiers.
         locker_modifier = self._lockers_data["l"] * 1.5
         selector_modifier = self._lockers_data["l"] * 1.7
@@ -67,6 +67,12 @@ class Grid:
             selector_pos_y = (self._screen_y / 2) - (locker.w * 1.5)
             selector_pos_x = self.start_pos - selector_modifier
             locker.selector.rect = pygame.Rect(selector_pos_x, selector_pos_y, locker.selector.l, locker.selector.w)
+
+            # mixing locker type.
+            if mixed:
+                # odd for example.
+                if index % 2:
+                    locker.blocked_type = True
 
             # iterate next modifiers.
             locker_modifier += self._lockers_data["l"] * 2
