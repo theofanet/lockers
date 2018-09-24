@@ -9,12 +9,13 @@ class Grid:
     def __init__(self, lockers_data):
         # screen x y.
         self._screen_x, self._screen_y = App.get_screen_size()
+        self.scale = 4
 
         # locker const data.
         self._lockers_data = lockers_data
 
         # grid attributes.
-        self.l = self._lockers_data["nb"] * self._lockers_data["l"] * 2
+        self.l = self._lockers_data["nb"] * self._lockers_data["l"] * self.scale
         self.w = self._lockers_data["w"] * 2
         self.y = (self._screen_y / 2) - (self.w / 2)
         self.x = (self._screen_x / 2) - (self.l / 2)
@@ -29,7 +30,7 @@ class Grid:
         self.locker_win_nb = 0
         self.selected_locker = 0
 
-    def initiate_grid(self, mixed=False):
+    def initiate(self, mixed=False):
         # set locker and selector modifiers.
         locker_modifier = self._lockers_data["l"] * 1.5
         selector_modifier = self._lockers_data["l"] * 1.7
@@ -75,8 +76,8 @@ class Grid:
                     locker.blocked_type = True
 
             # iterate next modifiers.
-            locker_modifier += self._lockers_data["l"] * 2
-            selector_modifier += self._lockers_data["l"] * 2
+            locker_modifier += self._lockers_data["l"] * self.scale
+            selector_modifier += self._lockers_data["l"] * self.scale
 
         # define grid rect.
         self.rect = pygame.Rect(self.x, self.y, self.l, self.w)

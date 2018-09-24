@@ -1,5 +1,7 @@
 from PyGnin import *
 from Entities.grid import Grid
+from Entities.progress import Progress
+from Scenes.theme import *
 import pygame
 
 DEBUG_MODE = True
@@ -14,7 +16,7 @@ LOCKER_DOWN = 2
 
 STATE_WAIT = 0
 STATE_WIN = 1
-MAX_TIMER = 100
+MAX_TIMER = 10
 
 
 class Locker1(Game.SubScene):
@@ -26,6 +28,9 @@ class Locker1(Game.SubScene):
             App.show_cursor(True)
         # ####################
 
+        # screen x y.
+        self._screen_x, self._screen_y = App.get_screen_size()
+
         # font.
         self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf")
 
@@ -33,12 +38,17 @@ class Locker1(Game.SubScene):
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
         self._grid = Grid(self.lockers_data)
 
+        # generate progress bar.
+        pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
+        self._progress = Progress(pos_data)
+
         # scene attributes.
         self._state = STATE_WAIT
         self._elapsed_time = 0
 
     def _initiate_data(self):
-        self._grid.initiate_grid()
+        self._grid.initiate()
+        self._progress.initiate()
 
     def update(self):
         # ####### ESC #######
@@ -48,6 +58,10 @@ class Locker1(Game.SubScene):
         # game not won and timer still ok.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
             self._elapsed_time += App.get_time()
+
+            # update progress bar.
+            percent = self._elapsed_time / 1000 / MAX_TIMER * self._progress.in_l
+            self._progress.rect_in.width = self._progress.in_l - percent
 
             # isolate selected locker index and associated Locker.
             i = self._grid.selected_locker
@@ -114,25 +128,49 @@ class Locker1(Game.SubScene):
         # game not won and timer still running.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
             # print time left.
-            self._font.draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (10, 10), (255, 0, 0))
+            if DEBUG_MODE:
+                self._font.draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (self._progress.out_x - 70, self._progress.out_y - 15), COLOR_DEFAULT)
 
             # draw grid.
-            pygame.draw.rect(App.get_display(), (255, 0, 0), self._grid, 1)
+            pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._grid, 1)
 
-            # draw lockers / footprints / selectors.
+            # draw lockers / footprints / probes / selectors.
+            probe_modifier = self.lockers_data["l"] * 1.5
             for index in range(len(self._grid.lockers_list)):
+                # lockers & footprints.
                 locker = self._grid.lockers_list[index]
                 if locker.discover:
-                    pygame.draw.rect(App.get_display(), (91, 91, 91), locker.footprint)
-                pygame.draw.rect(App.get_display(), (0, 255, 0) if locker.win_position else (0, 255, 255), locker.rect)
+                    pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
+                pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
 
+                # probes.
+                probe_y = (self._screen_y / 2) - (locker.w * 1.7)
+                probe_x = self._grid.start_pos - probe_modifier
+                probe = ((probe_x, probe_y),
+                         (probe_x-5, probe_y-5),
+                         (probe_x-5, probe_y-15),
+                         (probe_x, probe_y-20),
+                         (probe_x+10, probe_y-20),
+                         (probe_x+15, probe_y-15),
+                         (probe_x+15, probe_y-5),
+                         (probe_x+10, probe_y))
+                pygame.draw.polygon(App.get_display(), COLOR_WIN if locker.win_position else COLOR_DEFAULT, probe, 1)
+                probe_modifier += self.lockers_data["l"] * self._grid.scale
+
+                # selector.
                 if index == self._grid.selected_locker:
                     pygame.draw.rect(App.get_display(), (0, 0, 255), locker.selector.rect, 1)
+
+            # progress bar.
+            last_chance = self._elapsed_time / 1000 / MAX_TIMER
+            pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._progress.rect_out, 1)
+            pygame.draw.rect(App.get_display(), COLOR_WARNING if last_chance >= 0.7 else COLOR_WIN, self._progress.rect_in)
+
         # winning case.
         elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
-                self._font.draw_text("%.2f" % score, (10, 10), (255, 0, 0))
-                self._font.draw_text("Win !", (330, 20), (255, 0, 0))
+                self._font.draw_text("%.2f" % score, (10, 10), COLOR_DEFAULT)
+                self._font.draw_text("Win !", (330, 20), COLOR_WIN)
         # loosing case.
         else:
-            self._font.draw_text("Loose ...", (330, 20), (255, 0, 0))
+            self._font.draw_text("Loose ...", (330, 20), COLOR_WARNING)
