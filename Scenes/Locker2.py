@@ -28,9 +28,13 @@ class Locker2(Game.SubScene):
         # screen x y.
         self._screen_x, self._screen_y = App.get_screen_size()
 
-        # font & image.
+        # font & image & sounds.
         self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf", 25)
         self._bonus = Render.Image("assets/Footprint.png", scale=1, color=COLOR_WIN)
+
+        self._amb_2 = pygame.mixer.Sound("assets/sounds/amb_2.wav")
+        self._click_1 = pygame.mixer.Sound("assets/sounds/click_1.wav")
+        self._trigger_1 = pygame.mixer.Sound("assets/sounds/trigger_1.wav")
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
@@ -47,11 +51,13 @@ class Locker2(Game.SubScene):
     def _initiate_data(self):
         self._grid.initiate()
         self._progress.initiate()
+        self._amb_2.play()
 
     def update(self):
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
+            self._amb_2.stop()
 
         # game not won and timer still ok.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
@@ -85,7 +91,13 @@ class Locker2(Game.SubScene):
                     l.win_position = True
                     l.discover = True
                     self._grid.locker_win_nb += 1
+
+                    # sound effects.
+                    self._trigger_1.play()
                 else:
+                    # sound effects.
+                    self._click_1.play()
+
                     if l.win_position:
                         l.win_position = False
                         self._grid.locker_win_nb -= 1
@@ -111,7 +123,13 @@ class Locker2(Game.SubScene):
                     l.win_position = True
                     l.discover = True
                     self._grid.locker_win_nb += 1
+
+                    # sound effects.
+                    self._trigger_1.play()
                 else:
+                    # sound effects.
+                    self._click_1.play()
+
                     if l.win_position:
                         l.win_position = False
                         self._grid.locker_win_nb -= 1
@@ -172,6 +190,12 @@ class Locker2(Game.SubScene):
                 self._font.draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
                 self._bonus.draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
                 self._font.draw_text("Block locker unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
+
+                # sound effects.
+                self._amb_2.fadeout(6000)
         # loosing case.
         else:
             self._font.draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
+
+            # sound effects.
+            self._amb_2.fadeout(4000)

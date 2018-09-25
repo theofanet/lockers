@@ -28,9 +28,13 @@ class Locker4(Game.SubScene):
         # screen x y.
         self._screen_x, self._screen_y = App.get_screen_size()
 
-        # font & image.
+        # font & image & sounds.
         self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf", 25)
         self._bonus = Render.Image("assets/Clock.png", scale=1, color=COLOR_WIN)
+
+        self._amb_4 = pygame.mixer.Sound("assets/sounds/amb_4.wav")
+        self._click_1 = pygame.mixer.Sound("assets/sounds/click_1.wav")
+        self._trigger_1 = pygame.mixer.Sound("assets/sounds/trigger_1.wav")
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
@@ -47,11 +51,13 @@ class Locker4(Game.SubScene):
     def _initiate_data(self, **kargs):
         self._grid.initiate(mixed=True)
         self._progress.initiate()
+        self._amb_4.play()
 
     def update(self):
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
+            self._amb_4.stop()
 
         # game not won and timer still ok.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
@@ -219,6 +225,12 @@ class Locker4(Game.SubScene):
                 self._font.draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
                 self._bonus.draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
                 self._font.draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
+
+                # sound effects.
+                self._amb_4.fadeout(6000)
         # loosing case.
         else:
             self._font.draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
+
+            # sound effects.
+            self._amb_4.fadeout(4000)
