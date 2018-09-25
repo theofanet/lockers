@@ -35,6 +35,7 @@ class Locker3(Game.SubScene):
         self._amb_3 = pygame.mixer.Sound("assets/sounds/amb_3.wav")
         self._click_1 = pygame.mixer.Sound("assets/sounds/click_1.wav")
         self._trigger_1 = pygame.mixer.Sound("assets/sounds/trigger_1.wav")
+        self._red_zone = pygame.mixer.Sound("assets/sounds/red_zone.wav")
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
@@ -47,6 +48,7 @@ class Locker3(Game.SubScene):
         # scene attributes.
         self._state = STATE_WAIT
         self._elapsed_time = 0
+        self._rz = False
 
     def _initiate_data(self, **kwargs):
         self._grid.initiate(mixed=True)
@@ -58,6 +60,7 @@ class Locker3(Game.SubScene):
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
             self._amb_3.stop()
+            self._red_zone.stop()
 
         # game not won and timer still ok.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
@@ -186,7 +189,15 @@ class Locker3(Game.SubScene):
             # progress bar.
             last_chance = self._elapsed_time / 1000 / MAX_TIMER
             pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._progress.rect_out, 1)
-            pygame.draw.rect(App.get_display(), COLOR_WARNING if last_chance >= 0.7 else COLOR_WIN, self._progress.rect_in)
+            if last_chance >= 0.7:
+                pygame.draw.rect(App.get_display(), COLOR_WARNING, self._progress.rect_in)
+
+                # sound effects.
+                if not self._rz:
+                    self._red_zone.play()
+                    self._rz = True
+            else:
+                pygame.draw.rect(App.get_display(), COLOR_WIN, self._progress.rect_in)
 
         # winning case.
         elif self._state == STATE_WIN:
