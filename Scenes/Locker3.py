@@ -4,7 +4,6 @@ from Entities.progress import Progress
 from Scenes.theme import *
 import pygame
 
-DEBUG_MODE = True
 
 LOCKERS_NB = 20
 LOCKERS_L = 10
@@ -16,7 +15,7 @@ LOCKER_DOWN = 2
 
 STATE_WAIT = 0
 STATE_WIN = 1
-MAX_TIMER = 100
+MAX_TIMER = 60
 
 
 class Locker3(Game.SubScene):
@@ -31,8 +30,9 @@ class Locker3(Game.SubScene):
         # screen x y.
         self._screen_x, self._screen_y = App.get_screen_size()
 
-        # font.
-        self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf")
+        # font & image.
+        self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf", 25)
+        self._bonus = Render.Image("assets/Lock.png", scale=1, color=COLOR_WIN)
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
@@ -46,7 +46,7 @@ class Locker3(Game.SubScene):
         self._state = STATE_WAIT
         self._elapsed_time = 0
 
-    def _initiate_data(self, **kargs):
+    def _initiate_data(self, **kwargs):
         self._grid.initiate(mixed=True)
         self._progress.initiate()
 
@@ -63,12 +63,9 @@ class Locker3(Game.SubScene):
             percent = self._elapsed_time / 1000 / MAX_TIMER * self._progress.in_l
             self._progress.rect_in.width = self._progress.in_l - percent
 
-            # retrieve selected locker index.
+            # isolate selected locker index and associated Locker.
             i = self._grid.selected_locker
-            # isolate selected locker.
             l = self._grid.lockers_list[i]
-            # isolate mirror locker.
-            m = self._grid.lockers_list[len(self._grid.lockers_list) - 1 - i]
 
             # win condition.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
@@ -87,16 +84,6 @@ class Locker3(Game.SubScene):
                     l.rect.y += 60
                     l.position = LOCKER_DOWN
 
-                # redefine mirrored locker.
-                if m.position < LOCKER_DOWN:
-                    m.rect.y += 30
-                    m.position += 1
-                elif m.blocked_type:
-                    return
-                else:
-                    m.rect.y -=60
-                    m.position = LOCKER_UP
-
                 # update win position attributes.
                 if l.position == self._grid.lockers_win[i]:
                     l.win_position = True
@@ -105,16 +92,6 @@ class Locker3(Game.SubScene):
                 else:
                     if l.win_position:
                         l.win_position = False
-                        self._grid.locker_win_nb -= 1
-
-                # update win mirror position attributes.
-                if m.position == self._grid.lockers_win[len(self._grid.lockers_list) - 1 - i]:
-                    m.win_position = True
-                    m.discover = True
-                    self._grid.locker_win_nb += 1
-                else:
-                    if m.win_position:
-                        m.win_position = False
                         self._grid.locker_win_nb -= 1
 
                 # update selected locker index.
@@ -135,16 +112,6 @@ class Locker3(Game.SubScene):
                     l.rect.y -= 60
                     l.position = LOCKER_UP
 
-                # redefine mirrored locker.
-                if m.position > LOCKER_UP:
-                    m.rect.y -= 30
-                    m.position -= 1
-                elif m.blocked_type:
-                    return
-                else:
-                    m.rect.y += 60
-                    m.position = LOCKER_DOWN
-
                 # update win position attributes.
                 if l.position == self._grid.lockers_win[i]:
                     l.win_position = True
@@ -155,16 +122,6 @@ class Locker3(Game.SubScene):
                         l.win_position = False
                         self._grid.locker_win_nb -= 1
 
-                # update win mirror position attributes.
-                if m.position == self._grid.lockers_win[len(self._grid.lockers_list) - 1 - i]:
-                    m.win_position = True
-                    m.discover = True
-                    self._grid.locker_win_nb += 1
-                else:
-                    if m.win_position:
-                        m.win_position = False
-                        self._grid.locker_win_nb -= 1
-
                 # update selected locker index.
                 if i < len(self._grid.lockers_list) - 1:
                     self._grid.selected_locker += 1
@@ -172,6 +129,8 @@ class Locker3(Game.SubScene):
                     self._grid.selected_locker = 0
 
     def draw(self, camera=None, screen=None):
+        mid_x = self._screen_x / 2
+        mid_y = self._screen_y / 2
         # game not won and timer still running.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
             # print time left.
@@ -216,8 +175,9 @@ class Locker3(Game.SubScene):
         # winning case.
         elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
-                self._font.draw_text("%.2f" % score, (10, 10), COLOR_DEFAULT)
-                self._font.draw_text("Win !", (330, 20), COLOR_WIN)
+                self._font.draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
+                self._bonus.draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
+                self._font.draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
         # loosing case.
         else:
-            self._font.draw_text("Loose ...", (330, 20), COLOR_WARNING)
+            self._font.draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)

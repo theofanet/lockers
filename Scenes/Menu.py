@@ -4,6 +4,7 @@ import pygame
 from .Locker1 import Locker1
 from .Locker2 import Locker2
 from .Locker3 import Locker3
+from .Locker4 import Locker4
 
 
 NB_LEVELS = 4
@@ -133,7 +134,7 @@ class LockersMenu(Game.Scene):
             LockerLevel(Locker1(), 0),
             LockerLevel(Locker2(), 1),
             LockerLevel(Locker3(), 2),
-            LockerLevel(Locker3(), 3)
+            LockerLevel(Locker4(), 3)
         ]
 
         self._bonuses = [

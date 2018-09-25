@@ -4,7 +4,6 @@ from Entities.progress import Progress
 from Scenes.theme import *
 import pygame
 
-DEBUG_MODE = True
 
 LOCKERS_NB = 20
 LOCKERS_L = 10
@@ -16,7 +15,7 @@ LOCKER_DOWN = 2
 
 STATE_WAIT = 0
 STATE_WIN = 1
-MAX_TIMER = 100
+MAX_TIMER = 60
 
 
 class Locker2(Game.SubScene):
@@ -31,8 +30,9 @@ class Locker2(Game.SubScene):
         # screen x y.
         self._screen_x, self._screen_y = App.get_screen_size()
 
-        # font.
-        self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf")
+        # font & image.
+        self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf", 25)
+        self._bonus = Render.Image("assets/Footprint.png", scale=1, color=COLOR_WIN)
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
@@ -46,8 +46,8 @@ class Locker2(Game.SubScene):
         self._state = STATE_WAIT
         self._elapsed_time = 0
 
-    def _initiate_data(self, **kwargs):
-        self._grid.initiate(mixed=True)
+    def _initiate_data(self):
+        self._grid.initiate()
         self._progress.initiate()
 
     def update(self):
@@ -78,8 +78,6 @@ class Locker2(Game.SubScene):
                 if l.position > LOCKER_UP:
                     l.rect.y -= 30
                     l.position -= 1
-                elif l.blocked_type:
-                    return
                 else:
                     l.rect.y += 60
                     l.position = LOCKER_DOWN
@@ -106,10 +104,8 @@ class Locker2(Game.SubScene):
                 if l.position < LOCKER_DOWN:
                     l.rect.y += 30
                     l.position += 1
-                elif l.blocked_type:
-                    return
                 else:
-                    l.rect.y -= 60
+                    l.rect.y -=60
                     l.position = LOCKER_UP
 
                 # update win position attributes.
@@ -129,6 +125,8 @@ class Locker2(Game.SubScene):
                     self._grid.selected_locker = 0
 
     def draw(self, camera=None, screen=None):
+        mid_x = self._screen_x / 2
+        mid_y = self._screen_y / 2
         # game not won and timer still running.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
             # print time left.
@@ -173,8 +171,9 @@ class Locker2(Game.SubScene):
         # winning case.
         elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
-                self._font.draw_text("%.2f" % score, (10, 10), COLOR_DEFAULT)
-                self._font.draw_text("Win !", (330, 20), COLOR_WIN)
+                self._font.draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
+                self._bonus.draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
+                self._font.draw_text("Block locker unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
         # loosing case.
         else:
-            self._font.draw_text("Loose ...", (330, 20), COLOR_WARNING)
+            self._font.draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)

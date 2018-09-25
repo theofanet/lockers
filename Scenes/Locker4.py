@@ -5,7 +5,7 @@ from Scenes.theme import *
 import pygame
 
 
-LOCKERS_NB = 10
+LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
 
@@ -15,10 +15,10 @@ LOCKER_DOWN = 2
 
 STATE_WAIT = 0
 STATE_WIN = 1
-MAX_TIMER = 30
+MAX_TIMER = 60
 
 
-class Locker1(Game.SubScene):
+class Locker4(Game.SubScene):
 
     def __init__(self):
         super().__init__()
@@ -32,7 +32,7 @@ class Locker1(Game.SubScene):
 
         # font & image.
         self._font = Render.Font("assets/Permanent_Marker/PermanentMarker-Regular.ttf", 25)
-        self._bonus = Render.Image("assets/Footprint.png", scale=1, color=COLOR_WIN)
+        self._bonus = Render.Image("assets/Clock.png", scale=1, color=COLOR_WIN)
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
@@ -46,8 +46,8 @@ class Locker1(Game.SubScene):
         self._state = STATE_WAIT
         self._elapsed_time = 0
 
-    def _initiate_data(self):
-        self._grid.initiate()
+    def _initiate_data(self, **kargs):
+        self._grid.initiate(mixed=True)
         self._progress.initiate()
 
     def update(self):
@@ -63,9 +63,12 @@ class Locker1(Game.SubScene):
             percent = self._elapsed_time / 1000 / MAX_TIMER * self._progress.in_l
             self._progress.rect_in.width = self._progress.in_l - percent
 
-            # isolate selected locker index and associated Locker.
+            # retrieve selected locker index.
             i = self._grid.selected_locker
+            # isolate selected locker.
             l = self._grid.lockers_list[i]
+            # isolate mirror locker.
+            m = self._grid.lockers_list[len(self._grid.lockers_list) - 1 - i]
 
             # win condition.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
@@ -78,17 +81,40 @@ class Locker1(Game.SubScene):
                 if l.position > LOCKER_UP:
                     l.rect.y -= 30
                     l.position -= 1
+                elif l.blocked_type:
+                    return
                 else:
                     l.rect.y += 60
                     l.position = LOCKER_DOWN
 
+                # redefine mirrored locker.
+                if m.position < LOCKER_DOWN:
+                    m.rect.y += 30
+                    m.position += 1
+                elif m.blocked_type:
+                    return
+                else:
+                    m.rect.y -=60
+                    m.position = LOCKER_UP
+
                 # update win position attributes.
                 if l.position == self._grid.lockers_win[i]:
                     l.win_position = True
+                    l.discover = True
                     self._grid.locker_win_nb += 1
                 else:
                     if l.win_position:
                         l.win_position = False
+                        self._grid.locker_win_nb -= 1
+
+                # update win mirror position attributes.
+                if m.position == self._grid.lockers_win[len(self._grid.lockers_list) - 1 - i]:
+                    m.win_position = True
+                    m.discover = True
+                    self._grid.locker_win_nb += 1
+                else:
+                    if m.win_position:
+                        m.win_position = False
                         self._grid.locker_win_nb -= 1
 
                 # update selected locker index.
@@ -103,17 +129,40 @@ class Locker1(Game.SubScene):
                 if l.position < LOCKER_DOWN:
                     l.rect.y += 30
                     l.position += 1
+                elif l.blocked_type:
+                    return
                 else:
-                    l.rect.y -=60
+                    l.rect.y -= 60
                     l.position = LOCKER_UP
+
+                # redefine mirrored locker.
+                if m.position > LOCKER_UP:
+                    m.rect.y -= 30
+                    m.position -= 1
+                elif m.blocked_type:
+                    return
+                else:
+                    m.rect.y += 60
+                    m.position = LOCKER_DOWN
 
                 # update win position attributes.
                 if l.position == self._grid.lockers_win[i]:
                     l.win_position = True
+                    l.discover = True
                     self._grid.locker_win_nb += 1
                 else:
                     if l.win_position:
                         l.win_position = False
+                        self._grid.locker_win_nb -= 1
+
+                # update win mirror position attributes.
+                if m.position == self._grid.lockers_win[len(self._grid.lockers_list) - 1 - i]:
+                    m.win_position = True
+                    m.discover = True
+                    self._grid.locker_win_nb += 1
+                else:
+                    if m.win_position:
+                        m.win_position = False
                         self._grid.locker_win_nb -= 1
 
                 # update selected locker index.
@@ -171,7 +220,7 @@ class Locker1(Game.SubScene):
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
                 self._font.draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
                 self._bonus.draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
-                self._font.draw_text("Footprint unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
+                self._font.draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
         # loosing case.
         else:
             self._font.draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
