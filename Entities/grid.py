@@ -81,3 +81,9 @@ class Grid:
 
         # define grid rect.
         self.rect = pygame.Rect(self.x, self.y, self.l, self.w)
+
+    def next_locker(self, current_index):
+        if current_index < len(self.lockers_list) - 1:
+            self.selected_locker += 1
+        else:
+            self.selected_locker = 0

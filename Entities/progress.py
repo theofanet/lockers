@@ -25,3 +25,7 @@ class Progress:
     def initiate(self):
         self.rect_out = pygame.Rect(self.out_x, self.out_y, self.out_l, self.out_w)
         self.rect_in = pygame.Rect(self.in_x, self.in_y, self.in_l, self.in_w)
+
+    def track_timer(self, current, max_t):
+        percent = current / max_t * self.in_l
+        self.rect_in.width = self.in_l - percent

@@ -46,106 +46,72 @@ class Locker3(Game.SubScene):
         self._progress = Progress(pos_data)
 
         # scene attributes.
-        self._state = STATE_WAIT
         self._elapsed_time = 0
         self._rz = False
 
     def _initiate_data(self, **kwargs):
+        self._set_state(STATE_WAIT)
         self._grid.initiate(mixed=True)
         self._progress.initiate()
         self._amb_3.play()
 
     def update(self):
+        # ####### TIMER #######
+        self._elapsed_time += App.get_time()
+        elapsed_time_s = self._elapsed_time / 1000
+
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
             self._amb_3.stop()
             self._red_zone.stop()
 
-        # game not won and timer still ok.
-        if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
-            self._elapsed_time += App.get_time()
+        # ####### GENERAL #######
+        if self._state == STATE_WAIT and MAX_TIMER > elapsed_time_s:
+            # win condition check.
+            if self._grid.locker_win_nb == self.lockers_data["nb"]:
+                self._set_state(STATE_WIN)
+                self._scene.level_complete(MAX_TIMER - (MAX_TIMER - elapsed_time_s))
 
-            # update progress bar.
-            percent = self._elapsed_time / 1000 / MAX_TIMER * self._progress.in_l
-            self._progress.rect_in.width = self._progress.in_l - percent
-
-            # isolate selected locker index and associated Locker.
+            # selected locker.
             i = self._grid.selected_locker
             l = self._grid.lockers_list[i]
+            wl_helper = self._grid.lockers_win[i]
 
-            # win condition.
-            if self._grid.locker_win_nb == self.lockers_data["nb"]:
-                self._state = STATE_WIN
-                self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
+            # progress bar.
+            self._progress.track_timer(elapsed_time_s, MAX_TIMER)
 
             # ####### UP #######
             if IO.Keyboard.is_down(K_UP):
-                # redefine locker position.
-                if l.position > LOCKER_UP:
-                    l.rect.y -= 30
-                    l.position -= 1
-                elif l.blocked_type:
-                    return
-                else:
-                    l.rect.y += 60
-                    l.position = LOCKER_DOWN
-
-                # update win position attributes.
-                if l.position == self._grid.lockers_win[i]:
-                    l.win_position = True
+                # set locker position.
+                win_pos = l.update_position(l.direction_up, wl_helper)
+                if win_pos and not l.blocked_triggered:
                     l.discover = True
                     self._grid.locker_win_nb += 1
-
-                    # sound effects.
                     self._trigger_1.play()
                 else:
-                    # sound effects.
+                    self._grid.locker_win_nb -= 1
                     self._click_1.play()
 
-                    if l.win_position:
-                        l.win_position = False
-                        self._grid.locker_win_nb -= 1
-
-                # update selected locker index.
-                if i < len(self._grid.lockers_list) - 1:
-                    self._grid.selected_locker += 1
-                else:
-                    self._grid.selected_locker = 0
+                # move to next locker.
+                if not l.blocked_triggered:
+                    self._grid.next_locker(i)
 
             # ####### DOWN #######
             elif IO.Keyboard.is_down(K_DOWN):
-                # redefine locker position.
-                if l.position < LOCKER_DOWN:
-                    l.rect.y += 30
-                    l.position += 1
-                elif l.blocked_type:
-                    return
-                else:
-                    l.rect.y -= 60
-                    l.position = LOCKER_UP
-
-                # update win position attributes.
-                if l.position == self._grid.lockers_win[i]:
-                    l.win_position = True
+                # set locker position.
+                win_pos = l.update_position(l.direction_down, wl_helper)
+                if win_pos and not l.blocked_triggered:
                     l.discover = True
                     self._grid.locker_win_nb += 1
-
-                    # sound effects.
                     self._trigger_1.play()
                 else:
-                    # sound effects.
+                    self._grid.locker_win_nb -= 1
                     self._click_1.play()
 
-                    if l.win_position:
-                        l.win_position = False
-                        self._grid.locker_win_nb -= 1
-
-                # update selected locker index.
-                if i < len(self._grid.lockers_list) - 1:
-                    self._grid.selected_locker += 1
-                else:
-                    self._grid.selected_locker = 0
+                # move to next locker.
+                if not l.blocked_triggered:
+                    self._grid.next_locker(i)
 
     def draw(self, camera=None, screen=None):
         mid_x = self._screen_x / 2
