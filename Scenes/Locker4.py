@@ -96,7 +96,7 @@ class Locker4(Game.SubScene):
                     self._click_1.play()
 
                 # set mirror position.
-                win_pos_m = m.update_position(m.direction_up, wm_helper, mirror=True)
+                win_pos_m = m.update_position(m.direction_down, wm_helper)
                 if win_pos_m:
                     m.discover = True
                     self._grid.locker_win_nb += 1
@@ -119,7 +119,7 @@ class Locker4(Game.SubScene):
                     self._click_1.play()
 
                 # set mirror position.
-                win_pos_m = m.update_position(m.direction_down, wm_helper, mirror=True)
+                win_pos_m = m.update_position(m.direction_up, wm_helper)
                 if win_pos_m:
                     m.discover = True
                     self._grid.locker_win_nb += 1
