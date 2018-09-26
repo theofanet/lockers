@@ -56,6 +56,7 @@ class Locker4(Game.SubScene):
         self._state = STATE_WAIT
         self._elapsed_time = 0
         self._rz = False
+        self._h_time = 0
 
         # bonus.
         self._footprint = Footprint()
@@ -79,15 +80,16 @@ class Locker4(Game.SubScene):
         self._sfx["amb4"].play()
 
     def update(self):
+        elapsed_time_s = self._h_time
         # ####### TIMER #######
-        elapsed_time_s = 0
         if self._clock_bonus.active:
             self._clock_bonus.charge_start += App.get_time()
             if self._clock_bonus.charge_start / 1000 >= self._clock_bonus.duration:
                 self._clock_bonus.active = False
+                self._h_time = elapsed_time_s
         else:
             self._elapsed_time += App.get_time()
-            elapsed_time_s = self._elapsed_time / 1000
+            self._h_time = self._elapsed_time / 1000
         # bonus.
         if self._footprint.active:
             self._footprint.charge_start += App.get_time()
