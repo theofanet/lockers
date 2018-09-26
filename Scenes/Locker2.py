@@ -127,8 +127,8 @@ class Locker2(Game.SubScene):
                 # move to next locker.
                 self._grid.next_locker(i)
 
-            # ####### F #######
-            elif IO.Keyboard.is_down(K_f):
+            # ####### Q #######
+            elif IO.Keyboard.is_down(K_q):
                 if not self._fp_bonus.active:
                     if self._fp_bonus.charges_left > 0:
                         self._fp_bonus.active = True

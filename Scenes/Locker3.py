@@ -136,16 +136,16 @@ class Locker3(Game.SubScene):
                 if not l.blocked_triggered or self._block_bonus.active:
                     self._grid.next_locker(i)
 
-            # ####### F #######
-            elif IO.Keyboard.is_down(K_f):
+            # ####### Q #######
+            elif IO.Keyboard.is_down(K_q):
                 if not self._fp_bonus.active:
                     if self._fp_bonus.charges_left > 0:
                         self._fp_bonus.active = True
                         self._fp_bonus.charges_left -= 1
                         self._fp_bonus.charge_start = App.get_time()
 
-            # ####### B #######
-            elif IO.Keyboard.is_down(K_b):
+            # ####### W #######
+            elif IO.Keyboard.is_down(K_w):
                 if not self._block_bonus.active:
                     if self._block_bonus.charges_left > 0:
                         self._block_bonus.active = True
@@ -173,7 +173,7 @@ class Locker3(Game.SubScene):
                 (o_x + 60, o_y),
                 COLOR_WIN if self._fp_bonus.active else COLOR_DEFAULT
             )
-            self._bonuses_img["lck"].set_color_t(COLOR_WIN if self._block_bonus.active else COLOR_DEFAULT).draw(o_x + 70, o_y)
+            self._bonuses_img["blk"].set_color_t(COLOR_WIN if self._block_bonus.active else COLOR_DEFAULT).draw(o_x + 70, o_y)
             self._fonts["perm"].draw_text(
                 "%s" % self._block_bonus.charges_left,
                 (o_x + 130, o_y),
