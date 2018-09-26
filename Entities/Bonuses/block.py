@@ -1,7 +1,7 @@
 from Entities.Bonuses.bonus import *
 
 
-class Lock(Bonus):
+class Block(Bonus):
 
     def __init__(self):
         super().__init__()

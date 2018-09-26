@@ -1,6 +1,9 @@
 from PyGnin import *
 from Entities.grid import Grid
 from Entities.progress import Progress
+from Entities.Bonuses.footprint import *
+from Entities.Bonuses.block import *
+from Entities.Bonuses.clock import *
 from Scenes.theme import *
 import pygame
 
@@ -8,6 +11,12 @@ import pygame
 LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
+
+FP_CHARGE_DURATION = 5
+FP_CHARGE_MAX = 2
+B_CHARGE_MAX = 4
+C_CHARGE_DURATION = 20
+C_CHARGE_MAX = 1
 
 MAX_TIMER = 60
 
@@ -29,9 +38,9 @@ class Locker4(Game.SubScene):
         self._bonuses_img = {}
         self._sfx = {}
         for k, v in FONTS.items():
-            self._fonts[k] = Render.Font(v, 25)
+            self._fonts[k] = Render.Font(v, 20)
         for k, v in BONUSES_IMG.items():
-            self._bonuses_img[k] = Render.Image(v, scale=1, color=COLOR_WIN)
+            self._bonuses_img[k] = Render.Image(v, scale=0.5, color=COLOR_WIN)
         for k, v in SOUND_FX.items():
             self._sfx[k] = pygame.mixer.Sound(v)
 
@@ -48,15 +57,42 @@ class Locker4(Game.SubScene):
         self._elapsed_time = 0
         self._rz = False
 
+        # bonus.
+        self._footprint = Footprint()
+        self._block_bonus = Block()
+        self._clock_bonus = Clock()
+
     def _initiate_data(self, **kargs):
         self._grid.initiate()
         self._progress.initiate()
+
+        # bonuses.
+        self._footprint.set_charge_duration(FP_CHARGE_DURATION)
+        self._footprint.set_charges_max(FP_CHARGE_MAX)
+        self._footprint.set_charges_left(FP_CHARGE_MAX)
+        self._block_bonus.set_charges_max(B_CHARGE_MAX)
+        self._block_bonus.set_charges_left(B_CHARGE_MAX)
+        self._clock_bonus.set_charges_max(B_CHARGE_MAX)
+        self._clock_bonus.set_charges_left(B_CHARGE_MAX)
+        self._clock_bonus.set_charge_duration(C_CHARGE_DURATION)
+
         self._sfx["amb4"].play()
 
     def update(self):
         # ####### TIMER #######
-        self._elapsed_time += App.get_time()
-        elapsed_time_s = self._elapsed_time / 1000
+        elapsed_time_s = 0
+        if self._clock_bonus.active:
+            self._clock_bonus.charge_start += App.get_time()
+            if self._clock_bonus.charge_start / 1000 >= self._clock_bonus.duration:
+                self._clock_bonus.active = False
+        else:
+            self._elapsed_time += App.get_time()
+            elapsed_time_s = self._elapsed_time / 1000
+        # bonus.
+        if self._footprint.active:
+            self._footprint.charge_start += App.get_time()
+            if self._footprint.charge_start / 1000 >= self._footprint.duration:
+                self._footprint.active = False
 
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
@@ -84,22 +120,24 @@ class Locker4(Game.SubScene):
             # ####### UP #######
             if IO.Keyboard.is_down(K_UP):
                 # set locker position.
-                win_pos = l.update_position(l.direction_up, wl_helper)
-                if win_pos:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if not self._block_bonus.active:
+                    win_pos = l.update_position(l.direction_up, wl_helper)
+                    if win_pos:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
 
                 # set mirror position.
-                win_pos_m = m.update_position(m.direction_down, wm_helper)
-                if win_pos_m:
-                    m.discover = True
-                    self._grid.locker_win_nb += 1
-                else:
-                    self._grid.locker_win_nb -= 1
+                if not self._block_bonus.active:
+                    win_pos_m = m.update_position(m.direction_down, wm_helper)
+                    if win_pos_m:
+                        m.discover = True
+                        self._grid.locker_win_nb += 1
+                    else:
+                        self._grid.locker_win_nb -= 1
 
                 # move to next locker.
                 self._grid.next_locker(i)
@@ -107,34 +145,87 @@ class Locker4(Game.SubScene):
             # ####### DOWN #######
             elif IO.Keyboard.is_down(K_DOWN):
                 # set locker position.
-                win_pos = l.update_position(l.direction_down, wl_helper)
-                if win_pos:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if not self._block_bonus.active:
+                    win_pos = l.update_position(l.direction_down, wl_helper)
+                    if win_pos:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
 
                 # set mirror position.
-                win_pos_m = m.update_position(m.direction_up, wm_helper)
-                if win_pos_m:
-                    m.discover = True
-                    self._grid.locker_win_nb += 1
-                else:
-                    self._grid.locker_win_nb -= 1
+                if not self._block_bonus.active:
+                    win_pos_m = m.update_position(m.direction_up, wm_helper)
+                    if win_pos_m:
+                        m.discover = True
+                        self._grid.locker_win_nb += 1
+                    else:
+                        self._grid.locker_win_nb -= 1
 
                 # move to next locker.
                 self._grid.next_locker(i)
+
+            # ####### Q #######
+            elif IO.Keyboard.is_down(K_q):
+                if not self._footprint.active:
+                    if self._footprint.charges_left > 0:
+                        self._footprint.active = True
+                        self._footprint.charges_left -= 1
+                        self._footprint.charge_start = App.get_time()
+
+            # ####### W #######
+            elif IO.Keyboard.is_down(K_w):
+                if not self._block_bonus.active:
+                    if self._block_bonus.charges_left > 0:
+                        self._block_bonus.active = True
+                        self._block_bonus.charges_left -= 1
+                        self._block_bonus.charge_start = App.get_time()
+                else:
+                    self._block_bonus.active = False
+
+            # ####### E #######
+            elif IO.Keyboard.is_down(K_e):
+                if not self._clock_bonus.active:
+                    if self._clock_bonus.charges_left > 0:
+                        self._clock_bonus.active = True
+                        self._clock_bonus.charges_left -= 1
+                        self._clock_bonus.charge_start = App.get_time()
+                else:
+                    self._clock_bonus.active = False
 
     def draw(self, camera=None, screen=None):
         mid_x = self._screen_x / 2
         mid_y = self._screen_y / 2
         # game not won and timer still running.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
-            # print time left.
+
+            # ### DEBUG MODE #####
             if DEBUG_MODE:
                 self._fonts["perm"].draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (self._progress.out_x - 70, self._progress.out_y - 15), COLOR_DEFAULT)
+            # ####################
+
+            # draw bonuses.
+            o_x, o_y = 200, 100
+            self._bonuses_img["fp"].set_color_t(COLOR_WIN if self._footprint.active else COLOR_DEFAULT).draw(o_x, o_y)
+            self._fonts["perm"].draw_text(
+                "%s" % self._footprint.charges_left,
+                (o_x + 60, o_y),
+                COLOR_WIN if self._footprint.active else COLOR_DEFAULT
+            )
+            self._bonuses_img["blk"].set_color_t(COLOR_WIN if self._block_bonus.active else COLOR_DEFAULT).draw(o_x + 70, o_y)
+            self._fonts["perm"].draw_text(
+                "%s" % self._block_bonus.charges_left,
+                (o_x + 130, o_y),
+                COLOR_WIN if self._block_bonus.active else COLOR_DEFAULT
+            )
+            self._bonuses_img["clk"].set_color_t(COLOR_WIN if self._clock_bonus.active else COLOR_DEFAULT).draw(o_x + 140, o_y)
+            self._fonts["perm"].draw_text(
+                "%d" % (self._clock_bonus.duration - (self._clock_bonus.charge_start / 1000)),
+                (o_x + 200, o_y),
+                COLOR_WIN if self._clock_bonus.active else COLOR_DEFAULT
+            )
 
             # draw grid.
             pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._grid, 1)
@@ -144,7 +235,7 @@ class Locker4(Game.SubScene):
             for index in range(len(self._grid.lockers_list)):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
-                if locker.discover:
+                if self._footprint.active:
                     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
                 pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
 

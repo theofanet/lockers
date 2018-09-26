@@ -10,8 +10,8 @@ LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
 
-B_CHARGE_DURATION = 5
-B_CHARGE_MAX = 3
+FP_CHARGE_DURATION = 5
+FP_CHARGE_MAX = 2
 
 MAX_TIMER = 60
 
@@ -47,21 +47,23 @@ class Locker2(Game.SubScene):
         pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
         self._progress = Progress(pos_data)
 
-        # bonus.
-        self._footprint = Footprint()
-
         # scene attributes.
-        self._bonuses = Footprint()
         self._elapsed_time = 0
         self._rz = False
+
+        # bonus.
+        self._fp_bonus = Footprint()
 
     def _initiate_data(self):
         self._set_state(STATE_WAIT)
         self._grid.initiate()
         self._progress.initiate()
-        self._footprint.set_charge_duration(B_CHARGE_DURATION)
-        self._footprint.set_charges_max(B_CHARGE_MAX)
-        self._footprint.set_charges_left(B_CHARGE_MAX)
+
+        # bonuses.
+        self._fp_bonus.set_charge_duration(FP_CHARGE_DURATION)
+        self._fp_bonus.set_charges_max(FP_CHARGE_MAX)
+        self._fp_bonus.set_charges_left(FP_CHARGE_MAX)
+
         self._sfx["amb2"].play()
 
     def update(self):
@@ -69,10 +71,10 @@ class Locker2(Game.SubScene):
         self._elapsed_time += App.get_time()
         elapsed_time_s = self._elapsed_time / 1000
         # bonus.
-        if self._footprint.active:
-            self._footprint.charge_start += App.get_time()
-            if self._footprint.charge_start / 1000 >= self._footprint.duration:
-                self._footprint.active = False
+        if self._fp_bonus.active:
+            self._fp_bonus.charge_start += App.get_time()
+            if self._fp_bonus.charge_start / 1000 >= self._fp_bonus.duration:
+                self._fp_bonus.active = False
 
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
@@ -127,24 +129,31 @@ class Locker2(Game.SubScene):
 
             # ####### F #######
             elif IO.Keyboard.is_down(K_f):
-                if not self._footprint.active:
-                    if self._footprint.charges_left > 0:
-                        self._footprint.active = True
-                        self._footprint.charges_left -= 1
-                        self._footprint.charge_start = App.get_time()
+                if not self._fp_bonus.active:
+                    if self._fp_bonus.charges_left > 0:
+                        self._fp_bonus.active = True
+                        self._fp_bonus.charges_left -= 1
+                        self._fp_bonus.charge_start = App.get_time()
 
     def draw(self, camera=None, screen=None):
         mid_x = self._screen_x / 2
         mid_y = self._screen_y / 2
         # game not won and timer still running.
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
-            # print time left.
+
+            # ### DEBUG MODE #####
             if DEBUG_MODE:
                 self._fonts["perm"].draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (self._progress.out_x - 70, self._progress.out_y - 15), COLOR_DEFAULT)
+            # ####################
 
             # draw bonuses.
-            self._bonuses_img["fp"].set_color_t(COLOR_WIN if self._footprint.active else COLOR_DEFAULT).draw(100, 100)
-            self._fonts["perm"].draw_text("%s" % self._footprint.charges_left, (160, 100), COLOR_WIN if self._footprint.active else COLOR_DEFAULT)
+            o_x, o_y = 200, 100
+            self._bonuses_img["fp"].set_color_t(COLOR_WIN if self._fp_bonus.active else COLOR_DEFAULT).draw(o_x, o_y)
+            self._fonts["perm"].draw_text(
+                "%s" % self._fp_bonus.charges_left,
+                (o_x + 60, o_y),
+                COLOR_WIN if self._fp_bonus.active else COLOR_DEFAULT
+            )
 
             # draw grid.
             pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._grid, 1)
@@ -154,7 +163,7 @@ class Locker2(Game.SubScene):
             for index in range(len(self._grid.lockers_list)):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
-                if self._footprint.active:
+                if self._fp_bonus.active:
                     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
                 pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
 

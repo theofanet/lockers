@@ -9,7 +9,7 @@ COLOR_GRAY = (149, 165, 166)
 
 BONUSES_IMG = {
     "fp": "assets/Footprint.png",
-    "lck": "assets/Lock.png",
+    "blk": "assets/Lock.png",
     "clk": "assets/Clock.png"
 }
 

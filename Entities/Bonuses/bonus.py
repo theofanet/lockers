@@ -4,6 +4,7 @@ class Bonus(object):
         self.duration = 0
         self.charges_max = 0
         self.charges_left = 0
+        self.charge_start = 0
         self.active = False
 
     def set_charge_duration(self, duration):
