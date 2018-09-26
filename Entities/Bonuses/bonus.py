@@ -1,12 +1,16 @@
 class Bonus(object):
 
     def __init__(self):
-        self._duration = None
-        self._charges_max = None
-        self._charges_left = None
+        self.duration = 0
+        self.charges_max = 0
+        self.charges_left = 0
+        self.active = False
 
-    def set_duration(self, duration):
-        self._duration = duration
+    def set_charge_duration(self, duration):
+        self.duration = duration
 
-    def set_max_charges(self, charges):
-        self._charges_max = charges
+    def set_charges_max(self, charges):
+        self.charges_max = charges
+
+    def set_charges_left(self, charges):
+        self.charges_left = charges

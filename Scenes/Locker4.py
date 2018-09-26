@@ -9,10 +9,6 @@ LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
 
-LOCKER_UP = 0
-LOCKER_MID = 1
-LOCKER_DOWN = 2
-
 MAX_TIMER = 60
 
 
@@ -29,14 +25,16 @@ class Locker4(Game.SubScene):
         self._screen_x, self._screen_y = App.get_screen_size()
 
         # assets.
-        self._font = Render.Font(FONTS[0], 25)
-        self._bonus = Render.Image(BONUSES_IMG[2], scale=1, color=COLOR_WIN)
-        self._sfx = [
-            pygame.mixer.Sound(SOUND_FX[3]), # 0 ambiance.
-            pygame.mixer.Sound(SOUND_FX[4]), # 1 click.
-            pygame.mixer.Sound(SOUND_FX[5]), # 2 trigger.
-            pygame.mixer.Sound(SOUND_FX[6]), # 3 red zone.
-        ]
+        self._fonts = {}
+        self._bonuses_img = {}
+        self._sfx = {}
+        for k, v in FONTS.items():
+            self._fonts[k] = Render.Font(v, 25)
+        for k, v in BONUSES_IMG.items():
+            self._bonuses_img[k] = Render.Image(v, scale=1, color=COLOR_WIN)
+        for k, v in SOUND_FX.items():
+            self._sfx[k] = pygame.mixer.Sound(v)
+
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
         self._grid = Grid(self.lockers_data)
@@ -53,7 +51,7 @@ class Locker4(Game.SubScene):
     def _initiate_data(self, **kargs):
         self._grid.initiate()
         self._progress.initiate()
-        self._sfx[0].play()
+        self._sfx["amb4"].play()
 
     def update(self):
         # ####### TIMER #######
@@ -63,8 +61,8 @@ class Locker4(Game.SubScene):
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
-            self._sfx[0].stop()
-            self._sfx[3].stop()
+            self._sfx["amb4"].stop()
+            self._sfx["rz"].stop()
 
         # ####### GENERAL #######
         if self._state == STATE_WAIT and MAX_TIMER > elapsed_time_s:
@@ -90,10 +88,10 @@ class Locker4(Game.SubScene):
                 if win_pos:
                     l.discover = True
                     self._grid.locker_win_nb += 1
-                    self._sfx[2].play()
+                    self._sfx["trig"].play()
                 else:
                     self._grid.locker_win_nb -= 1
-                    self._sfx[1].play()
+                    self._sfx["click"].play()
 
                 # set mirror position.
                 win_pos_m = m.update_position(m.direction_down, wm_helper)
@@ -113,10 +111,10 @@ class Locker4(Game.SubScene):
                 if win_pos:
                     l.discover = True
                     self._grid.locker_win_nb += 1
-                    self._sfx[2].play()
+                    self._sfx["trig"].play()
                 else:
                     self._grid.locker_win_nb -= 1
-                    self._sfx[1].play()
+                    self._sfx["click"].play()
 
                 # set mirror position.
                 win_pos_m = m.update_position(m.direction_up, wm_helper)
@@ -136,7 +134,7 @@ class Locker4(Game.SubScene):
         if self._state == STATE_WAIT and MAX_TIMER > self._elapsed_time / 1000:
             # print time left.
             if DEBUG_MODE:
-                self._font.draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (self._progress.out_x - 70, self._progress.out_y - 15), COLOR_DEFAULT)
+                self._fonts["perm"].draw_text("%.2f" % (MAX_TIMER - (self._elapsed_time / 1000)), (self._progress.out_x - 70, self._progress.out_y - 15), COLOR_DEFAULT)
 
             # draw grid.
             pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._grid, 1)
@@ -176,7 +174,7 @@ class Locker4(Game.SubScene):
 
                 # sound effects.
                 if not self._rz:
-                    self._sfx[3].play()
+                    self._sfx["rz"].play()
                     self._rz = True
             else:
                 pygame.draw.rect(App.get_display(), COLOR_WIN, self._progress.rect_in)
@@ -184,15 +182,15 @@ class Locker4(Game.SubScene):
         # winning case.
         elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
-                self._font.draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
-                self._bonus.draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
-                self._font.draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
+                self._fonts["perm"].draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
+                self._bonuses_img["clk"].draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
+                self._fonts["perm"].draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
 
                 # sound effects.
-                self._sfx[0].fadeout(6000)
+                self._sfx["amb4"].fadeout(6000)
         # loosing case.
         else:
-            self._font.draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
+            self._fonts["perm"].draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
 
             # sound effects.
-            self._sfx[0].fadeout(4000)
+            self._sfx["amb4"].fadeout(4000)
