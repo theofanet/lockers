@@ -1,6 +1,7 @@
 from PyGnin import *
 import pygame
 import random
+import math
 
 from .Locker1 import Locker1
 from .Locker2 import Locker2
@@ -14,8 +15,6 @@ from Entities.Bonuses.clock import Clock
 from Scenes.theme import BONUSES_IMG
 
 from Entities.Particles import ParticleEmitter
-
-
 NB_LEVELS = 4
 RED_COLOR = (192, 57, 43)
 GREEN_COLOR = (39, 174, 96)
@@ -111,8 +110,15 @@ class LockersMenu(Game.Scene):
         self._current_penta_point = (0, 0)
         self._animation_time = 0
         dx, dy = App.get_screen_size()
-        self._emitter = ParticleEmitter((-20, dy + 20), 500, (0, -80), life=4, size=30)
-        self._emitter.set_ranges(x_range=(0, dx+20), life=(-2, 2), size=(-10, 10), y_range=(-80, 0))
+
+        self._emitter = ParticleEmitter((-20, dy + 40), 1000, (0, -50), life=0.5, size=20)
+        self._emitter.set_ranges(x_range=(0, dx/4+20), life=(-2, 2), size=(-10, 10), y_range=(-50, 0))
+
+        self._emitter2 = ParticleEmitter((dx/4, dy + 40), 3000, (0, -50), life=0.2, size=20)
+        self._emitter2.set_ranges(x_range=(0, dx/2+20), life=(-2, 2), size=(-10, 10), y_range=(-50, 0))
+
+        self._emitter3 = ParticleEmitter((3 * dx/4, dy + 40), 1000, (0, -50), life=0.5, size=20)
+        self._emitter3.set_ranges(x_range=(0, dx/4+20), life=(-2, 2), size=(-10, 10), y_range=(-50, 0))
 
     def return_menu(self):
         self._active_level = None
@@ -200,6 +206,8 @@ class LockersMenu(Game.Scene):
             cursor_index = self._cursor.get_index()
 
             self._emitter.update()
+            self._emitter2.update()
+            self._emitter3.update()
 
             if self._launch_final_animation:
                 self._animation_time += App.get_time()
@@ -278,12 +286,18 @@ class LockersMenu(Game.Scene):
     def draw(self):
         y_offset = int(self._final_animation_y_offset)
 
+        #self._emitter2.update(App.get_display(), pygame.time.get_ticks())
+
         x_shake, y_shake = (0, 0)
-        self._emitter.draw()
         if self._launch_final_animation:
             x_shake, y_shake = (random.randint(-2, 2), random.randint(-2, 2))
 
         if self._active_level is None:
+
+            if self._final_animation_y_offset > 0:
+                self._emitter.draw()
+                self._emitter2.draw()
+                self._emitter3.draw()
             # Title
             dx, dy = App.get_screen_size()
             ddx = int(dx / 4)

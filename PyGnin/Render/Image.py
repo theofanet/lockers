@@ -30,11 +30,11 @@ class Image(object):
         self._img = img
         return self
 
-    def set_color_t(self, color):
+    def set_color_t(self, color, alpha=255):
         if self._color != color:
             r, g, b = color
             img = self._img.copy()
-            img.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
+            img.fill((0, 0, 0, alpha), None, pygame.BLEND_RGBA_MULT)
             img.fill((r, g, b, 0), None, pygame.BLEND_RGBA_ADD)
             self._color = (r, g, b)
             self._img = img
