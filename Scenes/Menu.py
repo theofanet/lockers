@@ -111,14 +111,14 @@ class LockersMenu(Game.Scene):
         self._animation_time = 0
         dx, dy = App.get_screen_size()
 
-        self._emitter = ParticleEmitter((-20, dy + 40), 500, (0, -50), life=0.5, size=20)
-        self._emitter.set_ranges(x_range=(0, dx/4+20), life=(-2, 2), size=(-10, 10), y_range=(-50, 0))
+        self._emitter = ParticleEmitter((-20, dy + 40), 500, (0, -50), life=1.5, size=20)
+        self._emitter.set_ranges(x_range=(0, dx/4+20), life=(0, 2), size=(-10, 10), y_range=(-50, 0))
 
-        self._emitter2 = ParticleEmitter((dx/4, dy + 40), 500, (0, -50), life=0.2, size=20)
-        self._emitter2.set_ranges(x_range=(0, dx/2+20), life=(-2, 2), size=(-10, 10), y_range=(-50, 0))
+        self._emitter2 = ParticleEmitter((dx/4, dy + 40), 500, (0, -50), life=1.0, size=20)
+        self._emitter2.set_ranges(x_range=(0, dx/2+20), life=(0, 2), size=(-10, 10), y_range=(-50, 0))
 
-        self._emitter3 = ParticleEmitter((3 * dx/4, dy + 40), 500, (0, -50), life=0.5, size=20)
-        self._emitter3.set_ranges(x_range=(0, dx/4+20), life=(-2, 2), size=(-10, 10), y_range=(-50, 0))
+        self._emitter3 = ParticleEmitter((3 * dx/4, dy + 40), 500, (0, -50), life=1.5, size=20)
+        self._emitter3.set_ranges(x_range=(0, dx/4+20), life=(0, 2), size=(-10, 10), y_range=(-50, 0))
 
     def return_menu(self):
         self._active_level = None
@@ -286,8 +286,6 @@ class LockersMenu(Game.Scene):
 
     def draw(self):
         y_offset = int(self._final_animation_y_offset)
-
-        #self._emitter2.update(App.get_display(), pygame.time.get_ticks())
 
         x_shake, y_shake = (0, 0)
         if self._launch_final_animation:
