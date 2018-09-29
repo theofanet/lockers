@@ -10,15 +10,15 @@ COLOR_PURPLE = (204, 0, 255)
 COLOR_GREEN = (0, 255, 0)
 
 BONUSES_IMG = {
-    "fp": "assets/Footprint.png",
-    "blk": "assets/Lock.png",
-    "clk": "assets/Clock.png",
-    "cube": "assets/cube.png",
+    # "fp": "assets/Footprint.png",
+    # "blk": "assets/Lock.png",
+    # "clk": "assets/Clock.png",
+    "blk": "assets/cube.png",
     "devil": "assets/devil.png",
-    "fprint": "assets/fprint.png",
+    "fp": "assets/fprint.png",
     "gear": "assets/gear.png",
     "insect": "assets/insect.png",
-    "nuke": "assets/nuke.png",
+    "clk": "assets/nuke.png",
     "rotate": "assets/rotate.png",
     "shape": "assets/shape.png",
     "shuffle": "assets/shuffle.png"
