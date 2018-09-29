@@ -5,7 +5,7 @@ import pygame
 
 
 class Particle(object):
-    def __init__(self, velocity, position, life=5, size=20, c=(18, 203, 196), c2=(0, 148, 50)):
+    def __init__(self, velocity, position, life=5, size=20, c=(68, 189, 50), c2=(25, 42, 86)):
         self._position = position
         self._life = life if life > 0 else 1
         self._size = size if size > 0 else 1
@@ -85,7 +85,7 @@ class ParticleEmitter(object):
         if random.random() < partial_particle:
             self.emit_particle()
 
-    def emit_particle(self, i=None):
+    def emit_particle(self):
         vx, vy = self._direction
         velocity = [
             vx + random.randint(self._direction_range[0][0], self._direction_range[0][1]),
