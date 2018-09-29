@@ -5,14 +5,16 @@ import pygame
 
 
 class Particle(object):
-    def __init__(self, velocity, position, life=5, size=20, c=(254, 0, 2), c2=(255, 255, 0)):
+    def __init__(self, velocity, position, life=5, size=20, c=(237, 237, 237), c2=(39, 174, 96)):
         self._position = position
-        self._life = life
-        self._size = size
+        self._life = life if life > 0 else 1
+        self._size = size if size > 0 else 1
         self._color = c
         self._color2 = c2
         self._velocity = velocity
         self._live_time = 0
+        self._img = None # Render.Image("assets/particle2.png", scale=0.15, color=c)
+        self._surface = pygame.Surface((self._size, self._size))
 
     def update(self):
         t = App.get_time() / 1000
@@ -28,7 +30,7 @@ class Particle(object):
             )
             return True
 
-    def get_color(self, darken=0.8):
+    def get_color(self, darken=0.6):
         r1, g1, b1 = self._color
         r2, g2, b2 = self._color2
         return (
@@ -39,12 +41,15 @@ class Particle(object):
 
     def draw(self):
         ratio = 1.0 - self._live_time / self._life
-        s = pygame.Surface((self._size, self._size))
-        s.set_alpha(ratio * 255)
-        s.fill(self.get_color())
-        App.get_display().blit(s, self._position)
-        #x, y = self._position
-        #pygame.draw.rect(App.get_display(), self._color, pygame.Rect(x, y,  self._size, self._size))
+        if self._img is None:
+            self._surface = pygame.transform.scale(self._surface, (int(ratio * self._size), int(ratio * self._size)))
+            self._surface.set_alpha(ratio * 255)
+            self._surface.fill(self.get_color())
+            App.get_display().blit(self._surface, self._position)
+        else:
+            x, y = self._position
+            self._img.set_color_t(self.get_color())
+            self._img.draw(x, y, at_center=True)
 
 
 class ParticleEmitter(object):
@@ -80,7 +85,7 @@ class ParticleEmitter(object):
         if random.random() < partial_particle:
             self.emit_particle()
 
-    def emit_particle(self):
+    def emit_particle(self, i=None):
         vx, vy = self._direction
         velocity = [
             vx + random.randint(self._direction_range[0][0], self._direction_range[0][1]),
