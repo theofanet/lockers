@@ -6,7 +6,7 @@ from Scenes.theme import *
 import pygame
 
 
-LOCKERS_NB = 20
+LOCKERS_NB = 2
 LOCKERS_L = 10
 LOCKERS_W = 40
 
@@ -100,6 +100,7 @@ class Locker2(Game.SubScene):
             i = self._grid.selected_locker
             l = self._grid.lockers_list[i]
             wl_helper = self._grid.lockers_win[i]
+            old_win_status = l.win_position
 
             # progress bar.
             self._progress.track_timer(elapsed_time_s, MAX_TIMER)
@@ -113,7 +114,8 @@ class Locker2(Game.SubScene):
                     self._grid.locker_win_nb += 1
                     self._sfx["trig"].play()
                 else:
-                    self._grid.locker_win_nb -= 1
+                    if old_win_status:
+                        self._grid.locker_win_nb -= 1
                     self._sfx["click"].play()
 
                 # move to next locker.
@@ -128,7 +130,8 @@ class Locker2(Game.SubScene):
                     self._grid.locker_win_nb += 1
                     self._sfx["trig"].play()
                 else:
-                    self._grid.locker_win_nb -= 1
+                    if old_win_status:
+                        self._grid.locker_win_nb -= 1
                     self._sfx["click"].play()
 
                 # move to next locker.

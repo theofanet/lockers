@@ -8,7 +8,7 @@ from Scenes.theme import *
 import pygame
 
 
-LOCKERS_NB = 20
+LOCKERS_NB = 2
 LOCKERS_L = 10
 LOCKERS_W = 40
 
@@ -71,6 +71,7 @@ class Locker4(Game.SubScene):
             self._active_bonuses.remove(bonus_class)
 
     def _initiate_data(self, **kargs):
+        self._set_state(STATE_WAIT)
         self._grid = Grid(self.lockers_data)
         self._grid.initiate()
         pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
@@ -112,6 +113,8 @@ class Locker4(Game.SubScene):
             m = self._grid.lockers_list[len(self._grid.lockers_list) - 1 - i]
             wl_helper = self._grid.lockers_win[i]
             wm_helper = self._grid.lockers_win[len(self._grid.lockers_list) - 1 - i]
+            old_win_status = l.win_position
+            old_miror_win_status = m.win_position
 
             # progress bar.
             self._progress.track_timer(elapsed_time_s, MAX_TIMER)
@@ -126,7 +129,8 @@ class Locker4(Game.SubScene):
                         self._grid.locker_win_nb += 1
                         self._sfx["trig"].play()
                     else:
-                        self._grid.locker_win_nb -= 1
+                        if old_win_status:
+                            self._grid.locker_win_nb -= 1
                         self._sfx["click"].play()
 
                 # set mirror position.
@@ -135,8 +139,8 @@ class Locker4(Game.SubScene):
                     if win_pos_m:
                         m.discover = True
                         self._grid.locker_win_nb += 1
-                    else:
-                        self._grid.locker_win_nb -= 1
+                    elif old_miror_win_status:
+                            self._grid.locker_win_nb -= 1
 
                 # move to next locker.
                 self._grid.next_locker(i)
@@ -151,7 +155,8 @@ class Locker4(Game.SubScene):
                         self._grid.locker_win_nb += 1
                         self._sfx["trig"].play()
                     else:
-                        self._grid.locker_win_nb -= 1
+                        if old_win_status:
+                            self._grid.locker_win_nb -= 1
                         self._sfx["click"].play()
 
                 # set mirror position.
@@ -160,7 +165,7 @@ class Locker4(Game.SubScene):
                     if win_pos_m:
                         m.discover = True
                         self._grid.locker_win_nb += 1
-                    else:
+                    elif old_miror_win_status:
                         self._grid.locker_win_nb -= 1
 
                 # move to next locker.

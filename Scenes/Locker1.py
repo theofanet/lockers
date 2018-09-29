@@ -4,7 +4,7 @@ from Entities.progress import Progress
 from Scenes.theme import *
 import pygame
 
-LOCKERS_NB = 10
+LOCKERS_NB = 1
 LOCKERS_L = 10
 LOCKERS_W = 40
 
@@ -68,6 +68,7 @@ class Locker1(Game.SubScene):
         # ####### GENERAL #######
         if self._state == STATE_WAIT and MAX_TIMER > elapsed_time_s:
             # win condition check.
+            print(self._grid.locker_win_nb)
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
                 self._set_state(STATE_WIN)
                 self._scene.level_complete(MAX_TIMER - (MAX_TIMER - elapsed_time_s))
@@ -76,6 +77,7 @@ class Locker1(Game.SubScene):
             i = self._grid.selected_locker
             l = self._grid.lockers_list[i]
             wl_helper = self._grid.lockers_win[i]
+            old_win_status = l.win_position
 
             # progress bar.
             self._progress.track_timer(elapsed_time_s, MAX_TIMER)
@@ -88,7 +90,8 @@ class Locker1(Game.SubScene):
                     self._grid.locker_win_nb += 1
                     self._sfx["trig"].play()
                 else:
-                    self._grid.locker_win_nb -= 1
+                    if old_win_status:
+                        self._grid.locker_win_nb -= 1
                     self._sfx["click"].play()
 
                 # move to next locker.
@@ -102,7 +105,8 @@ class Locker1(Game.SubScene):
                     self._grid.locker_win_nb += 1
                     self._sfx["trig"].play()
                 else:
-                    self._grid.locker_win_nb -= 1
+                    if old_win_status:
+                        self._grid.locker_win_nb -= 1
                     self._sfx["click"].play()
 
                 # move to next locker.
