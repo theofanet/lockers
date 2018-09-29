@@ -87,8 +87,14 @@ class MenuCursor(object):
     def draw(self, x_offset=0, y_offset=0):
         dx, dy = App.get_screen_size()
         ddx = int(dx / 4)
+        x = (ddx * self._index + ddx / 2)
+        y = (dy / 2)
 
-        self._img.draw((ddx * self._index + ddx / 2) + x_offset, (dy / 2) + self._offset_y + y_offset, at_center=True)
+        if self._index == NB_LEVELS:
+            x = (dx / 2)
+            y = (dy / 2) + 300 - y_offset / 2.5
+
+        self._img.draw(x + x_offset, y + self._offset_y + y_offset, at_center=True)
 
 
 class LockersMenu(Game.Scene):
@@ -100,6 +106,7 @@ class LockersMenu(Game.Scene):
         self._elapsed_time = 0
         self._fonts = None
         self._cursor = None
+        self._mouse_cursor = None
         self._bonuses = []
         self._launch_final_animation = False
         self._final_animation_y_offset = 0
@@ -164,6 +171,9 @@ class LockersMenu(Game.Scene):
             Render.Font("assets/fonts/IMPOS-30.ttf", 20)
         ]
 
+        App.show_cursor(False)
+        self._mouse_cursor = Render.Image("assets/cursor.png", scale=0.05)
+
         self._levels = [
             LockerLevel(Locker1(), 0),
             LockerLevel(Locker2([
@@ -173,11 +183,11 @@ class LockersMenu(Game.Scene):
                 Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
                 Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w)
             ]), 2),
-            # LockerLevel(Locker4([
-            #     Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
-            #     Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
-            #     Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
-            # ]), 3),
+            LockerLevel(Locker4([
+                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
+                Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
+                Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
+            ]), 3),
             LockerLevel(Final([
                 Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
                 Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
@@ -205,9 +215,29 @@ class LockersMenu(Game.Scene):
             self._cursor.update()
             cursor_index = self._cursor.get_index()
 
-            self._emitter.update()
-            self._emitter2.update()
-            self._emitter3.update()
+            dx, dy = App.get_screen_size()
+            mx, my = IO.Mouse.position()
+            ddx = int(dx / 4)
+            for i in range(NB_LEVELS):
+                x = ddx * i + ddx / 2
+                rect = pygame.Rect(int(x) - 25, int(dy / 2) - 25 - self._final_animation_y_offset, 50, 50)
+                if rect.collidepoint(mx, my):
+                    self._cursor.set_index(i)
+                    if IO.Mouse.is_down(1):
+                        self.activate_level(i, self)
+
+            if self._current_penta_line >= 6:
+                fx, fy = int(dx / 2) - 150, int(dy / 2) + 70 - 150
+                rect = pygame.Rect(int(fx), int(fy), 300, 300)
+                if rect.collidepoint(mx, my):
+                    self._cursor.set_index(NB_LEVELS)
+                    if IO.Mouse.is_down(1):
+                        self.activate_level(NB_LEVELS, self)
+
+            if self._final_animation_y_offset > 0:
+                self._emitter.update()
+                self._emitter2.update()
+                self._emitter3.update()
 
             if self._launch_final_animation:
                 self._animation_time += App.get_time()
@@ -258,12 +288,15 @@ class LockersMenu(Game.Scene):
                         self._animation_time = 0
                 elif self._animation_time > 700:
                     self._launch_final_animation = False
+                    self._cursor.set_index(NB_LEVELS)
 
             if IO.Keyboard.is_down(K_LEFT):
                 if cursor_index > 0:
                     self._cursor.set_index(cursor_index - 1)
             elif IO.Keyboard.is_up(K_RIGHT):
                 if cursor_index < NB_LEVELS - 1 and self._levels[cursor_index].is_done:
+                    self._cursor.set_index(cursor_index + 1)
+                elif cursor_index == NB_LEVELS - 1 and self._levels[cursor_index].is_done and self._current_penta_line >= 6:
                     self._cursor.set_index(cursor_index + 1)
             elif IO.Keyboard.is_down(K_RETURN):
                 self.activate_level(cursor_index, self)
@@ -291,7 +324,6 @@ class LockersMenu(Game.Scene):
             x_shake, y_shake = (random.randint(-2, 2), random.randint(-2, 2))
 
         if self._active_level is None:
-
             if self._final_animation_y_offset > 0:
                 self._emitter.draw()
                 self._emitter2.draw()
@@ -352,6 +384,13 @@ class LockersMenu(Game.Scene):
                     )
 
             self._cursor.draw(x_shake, y_shake - y_offset)
-            pygame.draw.circle(App.get_display(), COLOR_WIN, (int(ddx * self._cursor.get_index() + ddx / 2) + x_shake, int(dy / 2) - y_offset + y_shake), 35, 1)
+            c_index = self._cursor.get_index()
+            if c_index < NB_LEVELS:
+                pygame.draw.circle(App.get_display(), COLOR_WIN, (int(ddx * c_index + ddx / 2) + x_shake, int(dy / 2) - y_offset + y_shake), 35, 1)
+            else:
+                pygame.draw.circle(App.get_display(), COLOR_WIN, (int(dx / 2) + x_shake, int(dy / 2) + 70 + y_shake), 170, 1)
+
+            mx, my = IO.Mouse.position()
+            self._mouse_cursor.draw(mx, my)
         else:
             self._levels[self._active_level].draw()
