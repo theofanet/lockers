@@ -1,5 +1,6 @@
 from PyGnin import *
 import pygame
+import random
 
 from .Locker1 import Locker1
 from .Locker2 import Locker2
@@ -19,6 +20,14 @@ YELLOW_COLOR = (241, 196, 15)
 GRAY_COLOR = (149, 165, 166)
 CURSOR_ANIMATION_SPEED = 30
 
+
+PENTA = [
+    (0, -1),
+    (-0.588, 0.809),
+    (0.951, -0.309),
+    (-0.951, -0.309),
+    (0.588, 0.809)
+]
 
 class LockerLevel(object):
     def __init__(self, scene, index):
@@ -73,11 +82,11 @@ class MenuCursor(object):
             self._offset_y = 50
             self._speed = CURSOR_ANIMATION_SPEED
 
-    def draw(self):
+    def draw(self, x_offset=0, y_offset=0):
         dx, dy = App.get_screen_size()
         ddx = int(dx / 4)
 
-        self._img.draw((ddx * self._index + ddx / 2), (dy / 2) + self._offset_y, at_center=True)
+        self._img.draw((ddx * self._index + ddx / 2) + x_offset, (dy / 2) + self._offset_y + y_offset, at_center=True)
 
 
 class LockersMenu(Game.Scene):
@@ -90,6 +99,14 @@ class LockersMenu(Game.Scene):
         self._fonts = None
         self._cursor = None
         self._bonuses = []
+        self._launch_final_animation = False
+        self._final_animation_y_offset = 0
+        self._final_animation_first_line_height = 0
+        self._final_animation_second_line_width = 0
+        self._final_animation_circle_radius = 0
+        self._current_penta_line = 0
+        self._current_penta_point = (0, 0)
+        self._animation_time = 0
 
     def return_menu(self):
         self._active_level = None
@@ -170,6 +187,57 @@ class LockersMenu(Game.Scene):
         else:
             self._cursor.update()
             cursor_index = self._cursor.get_index()
+
+            if self._launch_final_animation:
+                self._animation_time += App.get_time()
+                dx, dy = App.get_screen_size()
+                y_offset_max = int(dy / 2) - int(dy / 3)
+                ddx = int(dx / 4)
+                w = ddx * 3 + int(ddx / 2) - int(dx / 2) - 150
+                h = y_offset_max + 70
+                if self._final_animation_y_offset < y_offset_max:
+                    self._final_animation_y_offset += 150 * (self._animation_time / 1000)
+                    if self._final_animation_y_offset >= y_offset_max:
+                        self._animation_time = 0
+                elif self._final_animation_first_line_height < h:
+                    self._final_animation_first_line_height += 100 * (self._animation_time / 1000)
+                    if self._final_animation_first_line_height >= h:
+                        self._animation_time = 0
+                        self._final_animation_first_line_height = h
+                elif self._final_animation_second_line_width < w:
+                    self._final_animation_second_line_width += 150 * (self._animation_time / 1000)
+                    if self._final_animation_second_line_width >= w:
+                        self._animation_time = 0
+                        self._final_animation_second_line_width = w
+                elif self._final_animation_circle_radius < 150:
+                    self._final_animation_circle_radius += 150 * (self._animation_time / 1000)
+                    if self._final_animation_circle_radius >= 150:
+                        self._animation_time = 0
+                        self._final_animation_circle_radius = 150
+                        self._current_penta_line = 1
+                        self._current_penta_point = (150*PENTA[0][0], 150*PENTA[0][1])
+                elif self._current_penta_line < 6:
+                    x, y = (int(dx / 2), int(dy / 2) + 70)
+                    lpx, lpy = PENTA[self._current_penta_line-1]
+                    px, py = self._current_penta_point
+                    npx, npy = PENTA[self._current_penta_line if self._current_penta_line < 5 else 0]
+                    lp = Game.Vector(x + 150*lpx, y + 150*lpy)
+                    p = Game.Vector(x + px, y + py)
+                    np = Game.Vector(x + 150*npx, y + 150*npy)
+                    nnp = lp.sub(np)
+                    l = p.sub(np).length()
+                    nnp.normalize()
+                    if l > 9:
+                        px = 150*lpx + 900 * nnp.x * (self._animation_time / 1000)
+                        py = 150*lpy + 900 * nnp.y * (self._animation_time / 1000)
+                        self._current_penta_point = (px, py)
+                    else:
+                        self._current_penta_point = (150*PENTA[self._current_penta_line if self._current_penta_line < 5 else 0][0], 150*PENTA[self._current_penta_line if self._current_penta_line < 5 else 0][1])
+                        self._current_penta_line += 1
+                        self._animation_time = 0
+                elif self._animation_time > 700:
+                    self._launch_final_animation = False
+
             if IO.Keyboard.is_down(K_LEFT):
                 if cursor_index > 0:
                     self._cursor.set_index(cursor_index - 1)
@@ -178,16 +246,28 @@ class LockersMenu(Game.Scene):
                     self._cursor.set_index(cursor_index + 1)
             elif IO.Keyboard.is_down(K_RETURN):
                 self.activate_level(cursor_index, self)
+            elif IO.Keyboard.is_down(K_a):
+                self._launch_final_animation = True
+                self._final_animation_y_offset = 0
+                self._animation_time = 0
+                self._final_animation_first_line_height = 0
+                self._final_animation_second_line_width = 0
+                self._final_animation_circle_radius = 0
 
         if IO.Keyboard.is_down(K_ESCAPE):
             App.exit()
+
 
     def activate_level(self, index, master_scene):
         self._active_level = index
         self._levels[self._active_level].init_scene(master_scene)
 
     def draw(self):
-        y_offset = 50
+        y_offset = int(self._final_animation_y_offset)
+
+        x_shake, y_shake = (0, 0)
+        if self._launch_final_animation:
+            x_shake, y_shake = (random.randint(-2, 2), random.randint(-2, 2))
 
         if self._active_level is None:
             # Title
@@ -196,8 +276,7 @@ class LockersMenu(Game.Scene):
             bx, by, bw, bh = (int(dx / 4), int(dy - 100), int(dx / 2), 80)
             bdx = int(bw / 4)
 
-            self._fonts[1].draw_text("Bichnel's lockerS", (dx / 2, 50), YELLOW_COLOR, center_x=True)
-            self._fonts[0].draw_text("level %i" % (self._cursor.get_index() + 1), (dx / 2, (dy / 2) + 80), YELLOW_COLOR, center_x=True)
+            self._fonts[1].draw_text("Bichnel's lockerS", (dx / 2 + x_shake, 50 + y_shake), YELLOW_COLOR, center_x=True)
 
             for i in range(NB_LEVELS):
                 level = self._levels[i]
@@ -207,20 +286,47 @@ class LockersMenu(Game.Scene):
 
                 # Drawing level circles
                 if level.is_done:
-                    self._fonts[2].draw_text("%.2fs" % level.time, (int(x), int(dy / 2) - 70), YELLOW_COLOR, center_x=True)
+                    self._fonts[2].draw_text("%.2fs" % level.time, (int(x) + x_shake, int(dy / 2) - 70 - y_offset + y_shake), YELLOW_COLOR, center_x=True)
 
-                pygame.draw.circle(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x), int(dy / 2) - y_offset), 25, 1 if not level.is_done else 0)
+                pygame.draw.circle(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x) + x_shake, int(dy / 2) - y_offset + y_shake), 25, 1 if not level.is_done else 0)
                 if i < NB_LEVELS - 1:
-                    pygame.draw.line(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x + 25), int(dy / 2) - y_offset), (int(x2 - 25), int(dy / 2) - y_offset))
+                    pygame.draw.line(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x + 25) + x_shake, int(dy / 2) - y_offset + y_shake), (int(x2 - 25) + x_shake, int(dy / 2) - y_offset + y_shake))
 
                 # Drawing Bonus circles
-                pygame.draw.circle(App.get_display(), GRAY_COLOR if not level.is_done else YELLOW_COLOR, (bx + int(bxx), by + int(bh / 2)), 25, 1)
+                pygame.draw.circle(App.get_display(), GRAY_COLOR if not level.is_done else YELLOW_COLOR, (bx + int(bxx) + x_shake, by + int(bh / 2) + y_shake), 25, 1)
 
                 if level.is_done:
-                    self._bonuses[i].draw(bx + int(bxx), by + int(bh / 2), at_center=True)
+                    self._bonuses[i].draw(bx + int(bxx) + x_shake, by + int(bh / 2) + y_shake, at_center=True)
 
-            self._cursor.draw()
-            pygame.draw.circle(App.get_display(), YELLOW_COLOR, (int(ddx * self._cursor.get_index() + ddx / 2), int(dy / 2)), 35, 1)
+            if self._final_animation_first_line_height > 0:
+                x = ddx * 3 + ddx / 2 + x_shake
+                y = int(dy / 2) + 25 - y_offset + y_shake
+                pygame.draw.line(App.get_display(), RED_COLOR, (int(x), int(y)), (int(x), int(y) + int(self._final_animation_first_line_height)))
+
+            if self._final_animation_second_line_width > 0:
+                x = ddx * 3 + ddx / 2 - self._final_animation_second_line_width + x_shake
+                y = int(dy / 2) + 25 - y_offset + self._final_animation_first_line_height + y_shake
+                pygame.draw.line(App.get_display(), RED_COLOR, (int(x), int(y)), (int(x + self._final_animation_second_line_width), int(y)))
+
+            if self._final_animation_circle_radius > 0:
+                pygame.draw.circle(App.get_display(), RED_COLOR, (int(dx / 2) + x_shake, int(dy / 2) + 70 + y_shake), int(self._final_animation_circle_radius), 1)
+
+            if self._final_animation_circle_radius >= 150:
+                x, y = (int(dx / 2) + x_shake, int(dy / 2) + 70 + y_shake)
+                for i in range(0, self._current_penta_line - 1):
+                    yy = i + 1 if i < 4 else 0
+                    pygame.draw.line(App.get_display(), RED_COLOR,
+                                    (x + int(150 * PENTA[i][0]), y + int(150 * PENTA[i][1])),
+                                     (x + int(150 * PENTA[yy][0]), y + int(150 * PENTA[yy][1])))
+                if self._current_penta_line <= 5:
+                    pygame.draw.line(
+                        App.get_display(), RED_COLOR,
+                        (x + int(150*PENTA[self._current_penta_line-1][0]), y + int(150*PENTA[self._current_penta_line-1][1])),
+                        (x + int(self._current_penta_point[0]), y + int(self._current_penta_point[1]))
+                    )
+
+            self._cursor.draw(x_shake, y_shake - y_offset)
+            pygame.draw.circle(App.get_display(), YELLOW_COLOR, (int(ddx * self._cursor.get_index() + ddx / 2) + x_shake, int(dy / 2) - y_offset + y_shake), 35, 1)
 
         else:
             self._levels[self._active_level].draw()
