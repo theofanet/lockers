@@ -5,11 +5,12 @@ import pygame
 
 
 class Particle(object):
-    def __init__(self, velocity, position, life=5, size=20, c=(255, 0, 0), c2=()):
+    def __init__(self, velocity, position, life=5, size=20, c=(254, 0, 2), c2=(255, 255, 0)):
         self._position = position
         self._life = life
         self._size = size
         self._color = c
+        self._color2 = c2
         self._velocity = velocity
         self._live_time = 0
 
@@ -27,12 +28,20 @@ class Particle(object):
             )
             return True
 
+    def get_color(self, darken=0.5):
+        r1, g1, b1 = self._color
+        r2, g2, b2 = self._color2
+        return (
+            (r1 + ((r2 - r1) / self._life) * self._live_time) * darken,
+            (g1 + ((g2 - g1) / self._life) * self._live_time) * darken,
+            (b1 + ((b2 - b1) / self._life) * self._live_time) * darken
+        )
+
     def draw(self):
-        print(self._position)
         ratio = 1.0 - self._live_time / self._life
         s = pygame.Surface((self._size, self._size))
         s.set_alpha(ratio * 255)
-        s.fill(self._color)
+        s.fill(self.get_color())
         App.get_display().blit(s, self._position)
         #x, y = self._position
         #pygame.draw.rect(App.get_display(), self._color, pygame.Rect(x, y,  self._size, self._size))
@@ -49,13 +58,15 @@ class ParticleEmitter(object):
         self._particle_life = life
         self._life_range = (0, 0)
         self._size_range = (0, 0)
+        self._direction_range = [(0, 0), (0, 0)]
 
     def update(self):
         self._particles = [particle for particle in self._particles if particle.update()]
         self.generate_particles()
 
-    def set_ranges(self, x_range=(0, 0), y_range=(0, 0), size=(0, 0), life=(0, 0)):
+    def set_ranges(self, x_range=(0, 0), y_range=(0, 0), size=(0, 0), life=(0, 0), direction_x=(0, 0), direction_y=(0, 0)):
         self._position_ranges = [x_range, y_range]
+        self._direction_range = [direction_x, direction_y]
         self._life_range = life
         self._size_range = size
 
@@ -70,7 +81,11 @@ class ParticleEmitter(object):
             self.emit_particle()
 
     def emit_particle(self):
-        velocity = self._direction
+        vx, vy = self._direction
+        velocity = [
+            vx + random.randint(self._direction_range[0][0], self._direction_range[0][1]),
+            vy + random.randint(self._direction_range[1][0], self._direction_range[1][1])
+        ]
         x, y = self._position
         position = (
             x + random.randint(self._position_ranges[0][0], self._position_ranges[0][1]),
