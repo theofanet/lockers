@@ -19,12 +19,14 @@ class Clock(Bonus):
             if self.charge_start / 1000 >= self.duration:
                 self.active = False
                 self.charges_left -= 1
+                self._scene.active_bonus(self)
 
         if IO.Keyboard.is_down(self._key):
             if not self.active and self.charges_left > 0:
                 self.active = True
             else:
                 self.active = False
+            self._scene.active_bonus(self)
 
     def draw(self, x, y, font):
         self.img.set_color_t(COLOR_WIN if self.active else COLOR_DEFAULT).draw(x, y)

@@ -12,6 +12,11 @@ class Bonus(object):
         self.active = False
         self.img = img
         self._key = keyboard_key
+        self._scene = None
+
+    def set_scene(self, scene):
+        self._scene = scene
+        return self
 
     def initiate(self):
         self.active = False
@@ -35,6 +40,7 @@ class Bonus(object):
                 self.active = True
                 self.charges_left -= 1
                 self.charge_start = App.get_time()
+                self._scene.active_bonus(self)
 
     def draw(self, x, y, font):
         self.img.set_color_t(COLOR_WIN if self.active else COLOR_DEFAULT).draw(x, y)

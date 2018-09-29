@@ -59,6 +59,16 @@ class Locker4(Game.SubScene):
 
         # bonus.
         self._bonuses = bonuses
+        self._active_bonuses = []
+        for bonus in self._bonuses:
+            bonus.set_scene(self)
+
+    def active_bonus(self, bonus):
+        bonus_class = bonus.__class__.__name__
+        if bonus.active and bonus_class not in self._active_bonuses:
+            self._active_bonuses.append(bonus_class)
+        elif not bonus.active and bonus_class in self._active_bonuses:
+            self._active_bonuses.remove(bonus_class)
 
     def _initiate_data(self, **kargs):
         self._grid = Grid(self.lockers_data)
@@ -74,7 +84,10 @@ class Locker4(Game.SubScene):
         self._sfx["amb4"].play()
 
     def update(self):
-        elapsed_time_s = self._h_time
+        if "Clock" not in self._active_bonuses:
+            self._elapsed_time += App.get_time()
+        elapsed_time_s = self._elapsed_time / 1000
+
         # ####### TIMER #######
         # bonus.
         for bonus in self._bonuses:
@@ -106,24 +119,24 @@ class Locker4(Game.SubScene):
             # ####### UP #######
             if IO.Keyboard.is_down(K_UP):
                 # set locker position.
-                # if not self._block_bonus.active:
-                win_pos = l.update_position(l.direction_up, wl_helper)
-                if win_pos:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if "Block" not in self._active_bonuses:
+                    win_pos = l.update_position(l.direction_up, wl_helper)
+                    if win_pos:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
 
                 # set mirror position.
-                # if not self._block_bonus.active:
-                win_pos_m = m.update_position(m.direction_down, wm_helper)
-                if win_pos_m:
-                    m.discover = True
-                    self._grid.locker_win_nb += 1
-                else:
-                    self._grid.locker_win_nb -= 1
+                if "Block" not in self._active_bonuses:
+                    win_pos_m = m.update_position(m.direction_down, wm_helper)
+                    if win_pos_m:
+                        m.discover = True
+                        self._grid.locker_win_nb += 1
+                    else:
+                        self._grid.locker_win_nb -= 1
 
                 # move to next locker.
                 self._grid.next_locker(i)
@@ -131,24 +144,24 @@ class Locker4(Game.SubScene):
             # ####### DOWN #######
             elif IO.Keyboard.is_down(K_DOWN):
                 # set locker position.
-                # if not self._block_bonus.active:
-                win_pos = l.update_position(l.direction_down, wl_helper)
-                if win_pos:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if "Block" not in self._active_bonuses:
+                    win_pos = l.update_position(l.direction_down, wl_helper)
+                    if win_pos:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
 
                 # set mirror position.
-                # if not self._block_bonus.active:
-                win_pos_m = m.update_position(m.direction_up, wm_helper)
-                if win_pos_m:
-                    m.discover = True
-                    self._grid.locker_win_nb += 1
-                else:
-                    self._grid.locker_win_nb -= 1
+                if "Block" not in self._active_bonuses:
+                    win_pos_m = m.update_position(m.direction_up, wm_helper)
+                    if win_pos_m:
+                        m.discover = True
+                        self._grid.locker_win_nb += 1
+                    else:
+                        self._grid.locker_win_nb -= 1
 
                 # move to next locker.
                 self._grid.next_locker(i)
@@ -179,8 +192,8 @@ class Locker4(Game.SubScene):
             for index in range(len(self._grid.lockers_list)):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
-                # if self._footprint.active:
-                #     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
+                if "Footprint" in self._active_bonuses:
+                    pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
                 pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
 
                 # probes.

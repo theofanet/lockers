@@ -19,3 +19,4 @@ class Block(Bonus):
                     self.charge_start = App.get_time()
             else:
                 self.active = False
+            self._scene.active_bonus(self)

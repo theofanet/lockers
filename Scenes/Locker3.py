@@ -54,6 +54,16 @@ class Locker3(Game.SubScene):
 
         # bonus.
         self._bonuses = bonuses
+        self._active_bonuses = []
+        for bonus in self._bonuses:
+            bonus.set_scene(self)
+
+    def active_bonus(self, bonus):
+        bonus_class = bonus.__class__.__name__
+        if bonus.active and bonus_class not in self._active_bonuses:
+            self._active_bonuses.append(bonus_class)
+        elif not bonus.active and bonus_class in self._active_bonuses:
+            self._active_bonuses.remove(bonus_class)
 
     def _initiate_data(self, **kwargs):
         self._set_state(STATE_WAIT)
@@ -101,37 +111,35 @@ class Locker3(Game.SubScene):
             # ####### UP #######
             if IO.Keyboard.is_down(K_UP):
                 # set locker position.
-                # if not self._block_bonus.active:
-                win_pos = l.update_position(l.direction_up, wl_helper)
-                if win_pos and not l.blocked_triggered:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if "Block" not in self._active_bonuses:
+                    win_pos = l.update_position(l.direction_up, wl_helper)
+                    if win_pos and not l.blocked_triggered:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
 
                 # move to next locker.
-                # if not l.blocked_triggered or self._block_bonus.active:
-                if not l.blocked_triggered:
+                if not l.blocked_triggered or "Block" in self._active_bonuses:
                     self._grid.next_locker(i)
 
             # ####### DOWN #######
             elif IO.Keyboard.is_down(K_DOWN):
                 # set locker position.
-                # if not self._block_bonus.active:
-                win_pos = l.update_position(l.direction_down, wl_helper)
-                if win_pos and not l.blocked_triggered:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if "Block" not in self._active_bonuses:
+                    win_pos = l.update_position(l.direction_down, wl_helper)
+                    if win_pos and not l.blocked_triggered:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
 
                 # move to next locker.
-                # if not l.blocked_triggered or self._block_bonus.active:
-                if not l.blocked_triggered:
+                if not l.blocked_triggered or "Block" in self._active_bonuses:
                     self._grid.next_locker(i)
 
     def draw(self, camera=None, screen=None):
@@ -160,8 +168,8 @@ class Locker3(Game.SubScene):
             for index in range(len(self._grid.lockers_list)):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
-                # if self._fp_bonus.active:
-                #     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
+                if "Footprint" in self._active_bonuses:
+                     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
                 pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
 
                 # probes.

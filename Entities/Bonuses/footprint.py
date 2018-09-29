@@ -19,3 +19,4 @@ class Footprint(Bonus):
             self.charge_start += App.get_time()
             if self.charge_start / 1000 >= self.duration:
                 self.active = False
+                self._scene.active_bonus(self)

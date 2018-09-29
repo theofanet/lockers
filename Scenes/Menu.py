@@ -21,7 +21,7 @@ CURSOR_ANIMATION_SPEED = 30
 
 
 class LockerLevel(object):
-    def __init__(self, scene, index, bonuses=[]):
+    def __init__(self, scene, index):
         self.is_done = False
         self.time = 0
         self._scene = scene
