@@ -25,3 +25,8 @@ class Vector(object):
 
     def angle(self):
         return math.atan2(self.x, self.y) * 180 / math.pi
+
+    def sub(self, vector):
+        self.x = vector.x - self.x
+        self.y = vector.y - self.y
+        return self
