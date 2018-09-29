@@ -119,7 +119,7 @@ class Grid:
                     locker.attach(Warp(Render.Image(BONUSES_IMG['shape'], scale=0.3, color=COLOR_PURPLE)))
                     locker.disruptor.y = self._screen_y / 2 - (locker.w * 3.2)
                 elif index in self._ds_list["devil"]:
-                    locker.attach(Reset(Render.Image(BONUSES_IMG['devil'], scale=0.3, color=COLOR_WARNING)))
+                    locker.attach(Reset(Render.Image(BONUSES_IMG['insect'], scale=0.3, color=COLOR_WARNING)))
                     locker.disruptor.y = self._screen_y / 2 - (locker.w * 3.2)
 
             # iterate next modifiers.
