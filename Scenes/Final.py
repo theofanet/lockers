@@ -1,7 +1,6 @@
-from PyGnin import *
 from Entities.grid import Grid
 from Entities.progress import Progress
-from Entities.Bonuses.footprint import *
+from Entities.Bonuses.clock import *
 from Scenes.theme import *
 import pygame
 
@@ -10,10 +9,16 @@ LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
 
+FP_CHARGE_DURATION = 5
+FP_CHARGE_MAX = 2
+B_CHARGE_MAX = 4
+C_CHARGE_DURATION = 20
+C_CHARGE_MAX = 1
+
 MAX_TIMER = 60
 
 
-class Locker2(Game.SubScene):
+class Final(Game.SubScene):
 
     def __init__(self, bonuses=[]):
         super().__init__()
@@ -32,7 +37,7 @@ class Locker2(Game.SubScene):
         for k, v in FONTS.items():
             self._fonts[k] = Render.Font(v, 20)
         for k, v in BONUSES_IMG.items():
-            self._bonuses_img[k] = Render.Image(v, scale=0.5, color=COLOR_DEFAULT)
+            self._bonuses_img[k] = Render.Image(v, scale=0.5, color=COLOR_WIN)
         for k, v in SOUND_FX.items():
             self._sfx[k] = pygame.mixer.Sound(v)
 
@@ -44,13 +49,14 @@ class Locker2(Game.SubScene):
         self._progress = None
 
         # scene attributes.
+        self._state = STATE_WAIT
         self._elapsed_time = 0
         self._rz = False
+        self._h_time = 0
 
-        self._active_bonuses = []
-
-        # bonuses.
+        # bonus.
         self._bonuses = bonuses
+        self._active_bonuses = []
         for bonus in self._bonuses:
             bonus.set_scene(self)
 
@@ -61,10 +67,10 @@ class Locker2(Game.SubScene):
         elif not bonus.active and bonus_class in self._active_bonuses:
             self._active_bonuses.remove(bonus_class)
 
-    def _initiate_data(self):
+    def _initiate_data(self, **kargs):
         self._elapsed_time = 0
         self._set_state(STATE_WAIT)
-        self._grid = Grid(self.lockers_data)
+        self._grid = Grid(self.lockers_data, disrupt=True)
         self._grid.initiate()
         pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
         self._progress = Progress(pos_data)
@@ -74,11 +80,12 @@ class Locker2(Game.SubScene):
         for bonus in self._bonuses:
             bonus.initiate()
 
-        self._sfx["amb2"].play()
+        self._sfx["amb4"].play()
 
     def update(self):
-        # ####### TIMER #######
         elapsed_time_s = self._elapsed_time / 1000
+
+        # ####### TIMER #######
         # bonus.
         for bonus in self._bonuses:
             bonus.update()
@@ -86,12 +93,13 @@ class Locker2(Game.SubScene):
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
-            self._sfx["amb2"].stop()
+            self._sfx["amb4"].stop()
             self._sfx["rz"].stop()
 
         # ####### GENERAL #######
         if self._state == STATE_WAIT and MAX_TIMER > elapsed_time_s:
-            self._elapsed_time += App.get_time()
+            if "Clock" not in self._active_bonuses:
+                self._elapsed_time += App.get_time()
 
             # win condition check.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
@@ -99,6 +107,7 @@ class Locker2(Game.SubScene):
                 self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
 
             # selected locker.
+            jump = False
             i = self._grid.selected_locker
             l = self._grid.lockers_list[i]
             wl_helper = self._grid.lockers_win[i]
@@ -110,34 +119,79 @@ class Locker2(Game.SubScene):
             # ####### UP #######
             if IO.Keyboard.is_down(K_UP):
                 # set locker position.
-                win_pos = l.update_position(l.direction_up, wl_helper)
-                if win_pos:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    if old_win_status:
-                        self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if "Block" not in self._active_bonuses:
+                    # disruptor.
+                    if l.disruptor.__class__.__name__ == "Warp" and not l.disruptor.triggered:
+                        for index in range(len(self._grid.lockers_list)):
+                            if self._grid.lockers_list[index].disruptor.__class__.__name__ == "Warp":
+                                self._grid.lockers_list[index].disruptor.triggered = False
+                                if index != i:
+                                    jump = True
+                                    self._grid.lockers_list[index].disruptor.triggered = True
+                                    i = index
+                                    break
+
+                    if l.disruptor.__class__.__name__ == "Reset":
+                        print("devil test")
+                        self._grid = Grid(self.lockers_data, disrupt=True)
+                        self._grid.initiate()
+
+                    if l.disruptor:
+                        if l.disruptor.__class__.__name__ == "Uptime":
+                            self._elapsed_time = l.disruptor.trigger_effect(self._elapsed_time)
+
+                    win_pos = l.update_position(l.direction_up, wl_helper)
+                    if win_pos:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        if old_win_status:
+                            self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
+
+                    # disruptor.
+                    if l.disruptor.__class__.__name__ == "Warp":
+                        l.disruptor.triggered = False
 
                 # move to next locker.
-                self._grid.next_locker(i)
+                self._grid.next_locker(i, jump)
 
             # ####### DOWN #######
             elif IO.Keyboard.is_down(K_DOWN):
                 # set locker position.
-                win_pos = l.update_position(l.direction_down, wl_helper)
-                if win_pos:
-                    l.discover = True
-                    self._grid.locker_win_nb += 1
-                    self._sfx["trig"].play()
-                else:
-                    if old_win_status:
-                        self._grid.locker_win_nb -= 1
-                    self._sfx["click"].play()
+                if "Block" not in self._active_bonuses:
+                    # disruptor.
+                    if l.disruptor.__class__.__name__ == "Warp" and not l.disruptor.triggered:
+                        for index in range(len(self._grid.lockers_list)):
+                            if self._grid.lockers_list[index].disruptor.__class__.__name__ == "Warp":
+                                self._grid.lockers_list[index].disruptor.triggered = False
+                                if index != i:
+                                    jump = True
+                                    self._grid.lockers_list[index].disruptor.triggered = True
+                                    i = index
+                                    break
+
+                    if l.disruptor:
+                        if l.disruptor.__class__.__name__ == "Uptime":
+                            self._elapsed_time = l.disruptor.trigger_effect(self._elapsed_time)
+
+                    win_pos = l.update_position(l.direction_down, wl_helper)
+                    if win_pos:
+                        l.discover = True
+                        self._grid.locker_win_nb += 1
+                        self._sfx["trig"].play()
+                    else:
+                        if old_win_status:
+                            self._grid.locker_win_nb -= 1
+                        self._sfx["click"].play()
+
+                    # disruptor.
+                    if l.disruptor.__class__.__name__ == "Warp":
+                        l.disruptor.triggered = False
 
                 # move to next locker.
-                self._grid.next_locker(i)
+                self._grid.next_locker(i, jump)
 
     def draw(self, camera=None, screen=None):
         mid_x = self._screen_x / 2
@@ -154,7 +208,7 @@ class Locker2(Game.SubScene):
             o_x, o_y = 200, 100
             i = 0
             for bonus in self._bonuses:
-                bonus.draw(o_x + i * 60, o_y, self._fonts["perm"])
+                bonus.draw(o_x + i * 70, o_y, self._fonts["perm"])
                 i += 1
 
             # draw grid.
@@ -166,8 +220,12 @@ class Locker2(Game.SubScene):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
                 if "Footprint" in self._active_bonuses:
-                     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
+                    pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
                 pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
+
+                # disruptor
+                if locker.disruptor:
+                    locker.disruptor.draw()
 
                 # probes.
                 probe_y = (self._screen_y / 2) - (locker.w * 1.7)
@@ -204,14 +262,14 @@ class Locker2(Game.SubScene):
         elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
                 self._fonts["perm"].draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
-                self._bonuses_img["fp"].draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
-                self._fonts["perm"].draw_text("Block locker unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
+                self._bonuses_img["clk"].draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
+                self._fonts["perm"].draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
 
                 # sound effects.
-                self._sfx["amb2"].fadeout(6000)
+                self._sfx["amb4"].fadeout(6000)
         # loosing case.
         else:
             self._fonts["perm"].draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
 
             # sound effects.
-            self._sfx["amb2"].fadeout(4000)
+            self._sfx["amb4"].fadeout(4000)

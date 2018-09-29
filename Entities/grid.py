@@ -1,12 +1,19 @@
 from PyGnin import *
 from random import randint
 from Entities.locker import Locker
+from Entities.Disruptors.uptime import *
+from Entities.Disruptors.warp import *
+from Entities.Disruptors.reset import *
 import pygame
+
+DISRUPT_UPTIME_NB = 1
+DISRUPT_WARP_NB = 2
+DISRUPT_RESET_NB = 1
 
 
 class Grid:
 
-    def __init__(self, lockers_data):
+    def __init__(self, lockers_data, disrupt=False):
         # screen x y.
         self._screen_x, self._screen_y = App.get_screen_size()
         self.scale = 4
@@ -20,6 +27,7 @@ class Grid:
         self.y = (self._screen_y / 2) - (self.w / 2)
         self.x = (self._screen_x / 2) - (self.l / 2)
         self.rect = None
+        self._disrupt = disrupt
 
         # global start position.
         self.start_pos = (self._screen_x / 2) + (self.l / 2)
@@ -30,10 +38,37 @@ class Grid:
         self.locker_win_nb = 0
         self.selected_locker = 0
 
+        # disruptors.
+        self._ds_list = {
+            "uptime": [],
+            "warp": [],
+            "devil": []
+        }
+
     def initiate(self, mixed=False):
         # set locker and selector modifiers.
         locker_modifier = self._lockers_data["l"] * 1.5
         selector_modifier = self._lockers_data["l"] * 1.7
+
+        # disruptors.
+        if self._disrupt:
+            for i in range(0, DISRUPT_UPTIME_NB):
+                uptime = randint(1, self._lockers_data["nb"] - 1)
+                while uptime in self._ds_list["uptime"]:
+                    uptime = randint(1, self._lockers_data["nb"] - 1)
+                self._ds_list["uptime"].append(uptime)
+
+            for i in range(0, DISRUPT_WARP_NB):
+                warp = randint(1, self._lockers_data["nb"] - 1)
+                while warp in self._ds_list["uptime"] or warp in self._ds_list["warp"]:
+                    warp = randint(1, self._lockers_data["nb"] - 1)
+                self._ds_list["warp"].append(warp)
+
+            for i in range(0, DISRUPT_RESET_NB):
+                devil = randint(1, self._lockers_data["nb"] - 1)
+                while devil in self._ds_list["uptime"] or devil in self._ds_list["warp"] or devil in self._ds_list["devil"]:
+                    devil = randint(1, self._lockers_data["nb"] - 1)
+                self._ds_list["devil"].append(devil)
 
         # generate initial/win/footprint lockers and associated selectors.
         for index in range(len(self.lockers_list)):
@@ -75,6 +110,18 @@ class Grid:
                 if index % 2:
                     locker.blocked_type = True
 
+            # disruptors.
+            if self._disrupt:
+                if index in self._ds_list["uptime"]:
+                    locker.attach(Uptime(Render.Image(BONUSES_IMG['gear'], scale=0.3, color=COLOR_GREEN)))
+                    locker.disruptor.y = self._screen_y / 2 - (locker.w * 3.2)
+                elif index in self._ds_list["warp"]:
+                    locker.attach(Warp(Render.Image(BONUSES_IMG['shape'], scale=0.3, color=COLOR_PURPLE)))
+                    locker.disruptor.y = self._screen_y / 2 - (locker.w * 3.2)
+                elif index in self._ds_list["devil"]:
+                    locker.attach(Reset(Render.Image(BONUSES_IMG['devil'], scale=0.3, color=COLOR_WARNING)))
+                    locker.disruptor.y = self._screen_y / 2 - (locker.w * 3.2)
+
             # iterate next modifiers.
             locker_modifier += self._lockers_data["l"] * self.scale
             selector_modifier += self._lockers_data["l"] * self.scale
@@ -82,8 +129,11 @@ class Grid:
         # define grid rect.
         self.rect = pygame.Rect(self.x, self.y, self.l, self.w)
 
-    def next_locker(self, current_index):
-        if current_index < len(self.lockers_list) - 1:
-            self.selected_locker += 1
+    def next_locker(self, current_index, jump=False):
+        if jump:
+            self.selected_locker = current_index
         else:
-            self.selected_locker = 0
+            if current_index < len(self.lockers_list) - 1:
+                self.selected_locker += 1
+            else:
+                self.selected_locker = 0

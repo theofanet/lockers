@@ -4,7 +4,7 @@ from Entities.progress import Progress
 from Scenes.theme import *
 import pygame
 
-LOCKERS_NB = 1
+LOCKERS_NB = 10
 LOCKERS_L = 10
 LOCKERS_W = 40
 
@@ -46,6 +46,7 @@ class Locker1(Game.SubScene):
         self._rz = False
 
     def _initiate_data(self):
+        self._elapsed_time = 0
         self._set_state(STATE_WAIT)
         self._grid = Grid(self.lockers_data)
         self._grid.initiate()

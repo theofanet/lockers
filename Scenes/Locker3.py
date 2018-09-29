@@ -7,7 +7,7 @@ from Scenes.theme import *
 import pygame
 
 
-LOCKERS_NB = 1
+LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
 
@@ -66,6 +66,7 @@ class Locker3(Game.SubScene):
             self._active_bonuses.remove(bonus_class)
 
     def _initiate_data(self, **kwargs):
+        self._elapsed_time = 0
         self._set_state(STATE_WAIT)
         self._grid = Grid(self.lockers_data)
         self._grid.initiate(mixed=True)

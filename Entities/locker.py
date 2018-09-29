@@ -23,6 +23,11 @@ class Locker:
         self.discover = False
         self.position = None
         self.blocked_type = False
+        self.disruptor = None
+
+    def attach(self, disruptor):
+        self.disruptor = disruptor
+        self.disruptor.x = self.rect.x - (self.l / 0.8)
 
     def update_position(self, direction, win_pos):
         self.blocked_triggered = False
