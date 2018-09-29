@@ -6,6 +6,9 @@ from .Locker2 import Locker2
 from .Locker3 import Locker3
 from .Locker4 import Locker4
 
+from Entities.Bonuses.bonus import Bonus
+from Scenes.theme import BONUSES_IMG
+
 
 NB_LEVELS = 4
 RED_COLOR = (192, 57, 43)
@@ -16,7 +19,7 @@ CURSOR_ANIMATION_SPEED = 30
 
 
 class LockerLevel(object):
-    def __init__(self, scene, index):
+    def __init__(self, scene, index, bonuses=[]):
         self.is_done = False
         self.time = 0
         self._scene = scene
@@ -132,15 +135,24 @@ class LockersMenu(Game.Scene):
 
         self._levels = [
             LockerLevel(Locker1(), 0),
-            LockerLevel(Locker2(), 1),
-            LockerLevel(Locker3(), 2),
-            LockerLevel(Locker4(), 3)
+            LockerLevel(Locker2([
+                Bonus(Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR), K_q)
+            ]), 1),
+            LockerLevel(Locker3([
+                Bonus(Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR), K_q),
+                Bonus(Render.Image(BONUSES_IMG['blk'], scale=0.273, color=GRAY_COLOR), K_w)
+            ]), 2),
+            LockerLevel(Locker4([
+                Bonus(Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR), K_q),
+                Bonus(Render.Image(BONUSES_IMG['blk'], scale=0.273, color=GRAY_COLOR), K_w),
+                Bonus(Render.Image(BONUSES_IMG['clk'], scale=0.273, color=GRAY_COLOR), K_e)
+            ]), 3)
         ]
 
         self._bonuses = [
-            Render.Image("assets/Footprint.png", scale=0.273, color=GRAY_COLOR),
-            Render.Image("assets/Lock.png", scale=0.273, color=GRAY_COLOR),
-            Render.Image("assets/Clock.png", scale=0.273, color=GRAY_COLOR),
+            Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR),
+            Render.Image(BONUSES_IMG['blk'], scale=0.273, color=GRAY_COLOR),
+            Render.Image(BONUSES_IMG['clk'], scale=0.273, color=GRAY_COLOR),
             Render.Image("assets/Clock.png", scale=0.273, color=GRAY_COLOR)
         ]
 

@@ -10,7 +10,7 @@ class SubScene(object):
 
     def _set_state(self, state): self._state = state
 
-    def _initiate_data(self, **kargs): pass
+    def _initiate_data(self, **kwargs): pass
 
     def draw(self, camera=None, screen=None): pass
 
