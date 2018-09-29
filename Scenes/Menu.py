@@ -6,11 +6,14 @@ from .Locker1 import Locker1
 from .Locker2 import Locker2
 from .Locker3 import Locker3
 from .Locker4 import Locker4
+from .Final import Final
 
 from Entities.Bonuses.footprint import Footprint
 from Entities.Bonuses.block import Block
 from Entities.Bonuses.clock import Clock
 from Scenes.theme import BONUSES_IMG
+
+from Entities.Particles import ParticleEmitter
 
 
 NB_LEVELS = 4
@@ -107,6 +110,8 @@ class LockersMenu(Game.Scene):
         self._current_penta_line = 0
         self._current_penta_point = (0, 0)
         self._animation_time = 0
+        self._emitter = ParticleEmitter((500, 500), 50, (0, -50), life=10, size=20)
+        self._emitter.set_ranges(x_range=(-150, 150), life=(-2, 2), size=(-10, 10))
 
     def return_menu(self):
         self._active_level = None
@@ -161,7 +166,12 @@ class LockersMenu(Game.Scene):
                 Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
                 Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w)
             ]), 2),
-            LockerLevel(Locker4([
+            # LockerLevel(Locker4([
+            #     Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
+            #     Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
+            #     Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
+            # ]), 3),
+            LockerLevel(Final([
                 Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
                 Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
                 Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
@@ -187,6 +197,8 @@ class LockersMenu(Game.Scene):
         else:
             self._cursor.update()
             cursor_index = self._cursor.get_index()
+
+            self._emitter.update()
 
             if self._launch_final_animation:
                 self._animation_time += App.get_time()
@@ -227,7 +239,7 @@ class LockersMenu(Game.Scene):
                     nnp = lp.sub(np)
                     l = p.sub(np).length()
                     nnp.normalize()
-                    if l > 9:
+                    if l > 15:
                         px = 150*lpx + 900 * nnp.x * (self._animation_time / 1000)
                         py = 150*lpy + 900 * nnp.y * (self._animation_time / 1000)
                         self._current_penta_point = (px, py)
@@ -328,5 +340,6 @@ class LockersMenu(Game.Scene):
             self._cursor.draw(x_shake, y_shake - y_offset)
             pygame.draw.circle(App.get_display(), YELLOW_COLOR, (int(ddx * self._cursor.get_index() + ddx / 2) + x_shake, int(dy / 2) - y_offset + y_shake), 35, 1)
 
+            self._emitter.draw()
         else:
             self._levels[self._active_level].draw()
