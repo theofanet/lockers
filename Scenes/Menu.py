@@ -166,7 +166,6 @@ class LockersMenu(Game.Scene):
         App.show_cursor(True)
 
         self._fonts = [
-            Render.Font("assets/fonts/IMPOS-30.ttf", 35),
             Render.Font("assets/fonts/IMPOS-30.ttf", 70),
             Render.Font("assets/fonts/IMPOS-30.ttf", 20)
         ]
@@ -334,7 +333,7 @@ class LockersMenu(Game.Scene):
             bx, by, bw, bh = (int(dx / 4), int(dy - 100), int(dx / 2), 80)
             bdx = int(bw / 4)
 
-            self._fonts[1].draw_text("Bichnel's lockerS", (dx / 2 + x_shake, 50 + y_shake), COLOR_WIN, center_x=True)
+            self._fonts[0].draw_text("Bichnel's lockerS", (dx / 2 + x_shake, 50 + y_shake), COLOR_WIN, center_x=True)
 
             for i in range(NB_LEVELS):
                 level = self._levels[i]
@@ -344,7 +343,7 @@ class LockersMenu(Game.Scene):
 
                 # Drawing level circles
                 if level.is_done:
-                    self._fonts[2].draw_text("%.2fs" % level.time, (int(x) + x_shake, int(dy / 2) - 70 - y_offset + y_shake), COLOR_WIN, center_x=True)
+                    self._fonts[1].draw_text("%.2fs" % level.time, (int(x) + x_shake, int(dy / 2) - 70 - y_offset + y_shake), COLOR_WIN, center_x=True)
 
                 pygame.draw.circle(App.get_display(), COLOR_DEFAULT if not level.is_done else COLOR_WIN, (int(x) + x_shake, int(dy / 2) - y_offset + y_shake), 25, 1 if not level.is_done else 0)
                 if i < NB_LEVELS - 1:
