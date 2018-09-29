@@ -110,8 +110,9 @@ class LockersMenu(Game.Scene):
         self._current_penta_line = 0
         self._current_penta_point = (0, 0)
         self._animation_time = 0
-        self._emitter = ParticleEmitter((500, 500), 50, (0, -50), life=10, size=20)
-        self._emitter.set_ranges(x_range=(-150, 150), life=(-2, 2), size=(-10, 10))
+        dx, dy = App.get_screen_size()
+        self._emitter = ParticleEmitter((-20, dy + 20), 500, (0, -80), life=4, size=30)
+        self._emitter.set_ranges(x_range=(0, dx+20), life=(-2, 2), size=(-10, 10), y_range=(-80, 0))
 
     def return_menu(self):
         self._active_level = None
@@ -278,6 +279,7 @@ class LockersMenu(Game.Scene):
         y_offset = int(self._final_animation_y_offset)
 
         x_shake, y_shake = (0, 0)
+        self._emitter.draw()
         if self._launch_final_animation:
             x_shake, y_shake = (random.randint(-2, 2), random.randint(-2, 2))
 
@@ -339,7 +341,5 @@ class LockersMenu(Game.Scene):
 
             self._cursor.draw(x_shake, y_shake - y_offset)
             pygame.draw.circle(App.get_display(), YELLOW_COLOR, (int(ddx * self._cursor.get_index() + ddx / 2) + x_shake, int(dy / 2) - y_offset + y_shake), 35, 1)
-
-            self._emitter.draw()
         else:
             self._levels[self._active_level].draw()
