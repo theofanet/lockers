@@ -13,7 +13,7 @@ MAX_TIMER = 40
 
 class Locker1(Game.SubScene):
 
-    def __init__(self):
+    def __init__(self, bonuses=[]):
         super().__init__()
         # ### DEBUG MODE #####
         if DEBUG_MODE:

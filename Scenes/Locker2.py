@@ -10,15 +10,12 @@ LOCKERS_NB = 20
 LOCKERS_L = 10
 LOCKERS_W = 40
 
-FP_CHARGE_DURATION = 5
-FP_CHARGE_MAX = 2
-
 MAX_TIMER = 60
 
 
 class Locker2(Game.SubScene):
 
-    def __init__(self):
+    def __init__(self, bonuses=[]):
         super().__init__()
         # ### DEBUG MODE #####
         if DEBUG_MODE:
@@ -50,8 +47,8 @@ class Locker2(Game.SubScene):
         self._elapsed_time = 0
         self._rz = False
 
-        # bonus.
-        self._fp_bonus = Footprint()
+        # bonuses.
+        self._bonuses = bonuses
 
     def _initiate_data(self):
         self._set_state(STATE_WAIT)
@@ -62,9 +59,8 @@ class Locker2(Game.SubScene):
         self._progress.initiate()
 
         # bonuses.
-        self._fp_bonus.set_charge_duration(FP_CHARGE_DURATION)
-        self._fp_bonus.set_charges_max(FP_CHARGE_MAX)
-        self._fp_bonus.set_charges_left(FP_CHARGE_MAX)
+        for bonus in self._bonuses:
+            bonus.initiate()
 
         self._sfx["amb2"].play()
 
@@ -73,10 +69,8 @@ class Locker2(Game.SubScene):
         self._elapsed_time += App.get_time()
         elapsed_time_s = self._elapsed_time / 1000
         # bonus.
-        if self._fp_bonus.active:
-            self._fp_bonus.charge_start += App.get_time()
-            if self._fp_bonus.charge_start / 1000 >= self._fp_bonus.duration:
-                self._fp_bonus.active = False
+        for bonus in self._bonuses:
+            bonus.update()
 
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
@@ -129,14 +123,6 @@ class Locker2(Game.SubScene):
                 # move to next locker.
                 self._grid.next_locker(i)
 
-            # ####### Q #######
-            elif IO.Keyboard.is_down(K_q):
-                if not self._fp_bonus.active:
-                    if self._fp_bonus.charges_left > 0:
-                        self._fp_bonus.active = True
-                        self._fp_bonus.charges_left -= 1
-                        self._fp_bonus.charge_start = App.get_time()
-
     def draw(self, camera=None, screen=None):
         mid_x = self._screen_x / 2
         mid_y = self._screen_y / 2
@@ -150,12 +136,10 @@ class Locker2(Game.SubScene):
 
             # draw bonuses.
             o_x, o_y = 200, 100
-            self._bonuses_img["fp"].set_color_t(COLOR_WIN if self._fp_bonus.active else COLOR_DEFAULT).draw(o_x, o_y)
-            self._fonts["perm"].draw_text(
-                "%s" % self._fp_bonus.charges_left,
-                (o_x + 60, o_y),
-                COLOR_WIN if self._fp_bonus.active else COLOR_DEFAULT
-            )
+            i = 0
+            for bonus in self._bonuses:
+                bonus.draw(o_x + i * 60, o_y, self._fonts["perm"])
+                i += 1
 
             # draw grid.
             pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._grid, 1)
@@ -165,8 +149,8 @@ class Locker2(Game.SubScene):
             for index in range(len(self._grid.lockers_list)):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
-                if self._fp_bonus.active:
-                    pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
+                # if self._fp_bonus.active:
+                #     pygame.draw.rect(App.get_display(), COLOR_FOOTPRINT, locker.footprint)
                 pygame.draw.rect(App.get_display(), COLOR_DEFAULT, locker.rect, 1)
 
                 # probes.

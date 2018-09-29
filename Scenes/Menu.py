@@ -6,7 +6,9 @@ from .Locker2 import Locker2
 from .Locker3 import Locker3
 from .Locker4 import Locker4
 
-from Entities.Bonuses.bonus import Bonus
+from Entities.Bonuses.footprint import Footprint
+from Entities.Bonuses.block import Block
+from Entities.Bonuses.clock import Clock
 from Scenes.theme import BONUSES_IMG
 
 
@@ -136,16 +138,16 @@ class LockersMenu(Game.Scene):
         self._levels = [
             LockerLevel(Locker1(), 0),
             LockerLevel(Locker2([
-                Bonus(Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR), K_q)
+                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q)
             ]), 1),
             LockerLevel(Locker3([
-                Bonus(Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR), K_q),
-                Bonus(Render.Image(BONUSES_IMG['blk'], scale=0.273, color=GRAY_COLOR), K_w)
+                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
+                Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w)
             ]), 2),
             LockerLevel(Locker4([
-                Bonus(Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR), K_q),
-                Bonus(Render.Image(BONUSES_IMG['blk'], scale=0.273, color=GRAY_COLOR), K_w),
-                Bonus(Render.Image(BONUSES_IMG['clk'], scale=0.273, color=GRAY_COLOR), K_e)
+                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
+                Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
+                Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
             ]), 3)
         ]
 
