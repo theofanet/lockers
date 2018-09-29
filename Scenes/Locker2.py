@@ -41,11 +41,10 @@ class Locker2(Game.SubScene):
 
         # generate grid.
         self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
-        self._grid = Grid(self.lockers_data)
+        self._grid = None
 
         # generate progress bar.
-        pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
-        self._progress = Progress(pos_data)
+        self._progress = None
 
         # scene attributes.
         self._elapsed_time = 0
@@ -56,7 +55,10 @@ class Locker2(Game.SubScene):
 
     def _initiate_data(self):
         self._set_state(STATE_WAIT)
+        self._grid = Grid(self.lockers_data)
         self._grid.initiate()
+        pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
+        self._progress = Progress(pos_data)
         self._progress.initiate()
 
         # bonuses.
