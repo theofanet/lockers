@@ -81,7 +81,6 @@ class Locker3(Game.SubScene):
 
     def update(self):
         # ####### TIMER #######
-        self._elapsed_time += App.get_time()
         elapsed_time_s = self._elapsed_time / 1000
         # bonus.
         for bonus in self._bonuses:
@@ -95,10 +94,12 @@ class Locker3(Game.SubScene):
 
         # ####### GENERAL #######
         if self._state == STATE_WAIT and MAX_TIMER > elapsed_time_s:
+            self._elapsed_time += App.get_time()
+
             # win condition check.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
                 self._set_state(STATE_WIN)
-                self._scene.level_complete(MAX_TIMER - (MAX_TIMER - elapsed_time_s))
+                self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
 
             # selected locker.
             i = self._grid.selected_locker

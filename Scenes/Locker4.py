@@ -85,8 +85,6 @@ class Locker4(Game.SubScene):
         self._sfx["amb4"].play()
 
     def update(self):
-        if "Clock" not in self._active_bonuses:
-            self._elapsed_time += App.get_time()
         elapsed_time_s = self._elapsed_time / 1000
 
         # ####### TIMER #######
@@ -102,10 +100,13 @@ class Locker4(Game.SubScene):
 
         # ####### GENERAL #######
         if self._state == STATE_WAIT and MAX_TIMER > elapsed_time_s:
+            if "Clock" not in self._active_bonuses:
+                self._elapsed_time += App.get_time()
+
             # win condition check.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
                 self._set_state(STATE_WIN)
-                self._scene.level_complete(MAX_TIMER - (MAX_TIMER - elapsed_time_s))
+                self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
 
             # selected locker and mirror.
             i = self._grid.selected_locker

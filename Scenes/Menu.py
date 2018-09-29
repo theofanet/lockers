@@ -187,6 +187,8 @@ class LockersMenu(Game.Scene):
         self._levels[self._active_level].init_scene(master_scene)
 
     def draw(self):
+        y_offset = 50
+
         if self._active_level is None:
             # Title
             dx, dy = App.get_screen_size()
@@ -207,14 +209,15 @@ class LockersMenu(Game.Scene):
                 if level.is_done:
                     self._fonts[2].draw_text("%.2fs" % level.time, (int(x), int(dy / 2) - 70), YELLOW_COLOR, center_x=True)
 
-                pygame.draw.circle(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x), int(dy / 2)), 25, 1 if not level.is_done else 0)
+                pygame.draw.circle(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x), int(dy / 2) - y_offset), 25, 1 if not level.is_done else 0)
                 if i < NB_LEVELS - 1:
-                    pygame.draw.line(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x + 25), int(dy / 2)), (int(x2 - 25), int(dy / 2)))
+                    pygame.draw.line(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x + 25), int(dy / 2) - y_offset), (int(x2 - 25), int(dy / 2) - y_offset))
 
                 # Drawing Bonus circles
                 pygame.draw.circle(App.get_display(), GRAY_COLOR if not level.is_done else YELLOW_COLOR, (bx + int(bxx), by + int(bh / 2)), 25, 1)
 
-                self._bonuses[i].draw(bx + int(bxx), by + int(bh / 2), at_center=True)
+                if level.is_done:
+                    self._bonuses[i].draw(bx + int(bxx), by + int(bh / 2), at_center=True)
 
             self._cursor.draw()
             pygame.draw.circle(App.get_display(), YELLOW_COLOR, (int(ddx * self._cursor.get_index() + ddx / 2), int(dy / 2)), 35, 1)
