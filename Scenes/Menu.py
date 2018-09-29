@@ -92,7 +92,7 @@ class MenuCursor(object):
 
         if self._index == NB_LEVELS:
             x = (dx / 2)
-            y = (dy / 2) + 300 - y_offset / 2.5
+            y = (dy / 2) - y_offset + 210
 
         self._img.draw(x + x_offset, y + self._offset_y + y_offset, at_center=True)
 
@@ -170,7 +170,7 @@ class LockersMenu(Game.Scene):
             Render.Font("assets/fonts/IMPOS-30.ttf", 20)
         ]
 
-        App.show_cursor(False)
+        #App.show_cursor(False)
         self._mouse_cursor = Render.Image("assets/cursor.png", scale=0.05)
 
         self._levels = [
@@ -389,7 +389,7 @@ class LockersMenu(Game.Scene):
             else:
                 pygame.draw.circle(App.get_display(), COLOR_WIN, (int(dx / 2) + x_shake, int(dy / 2) + 70 + y_shake), 170, 1)
 
-            mx, my = IO.Mouse.position()
-            self._mouse_cursor.draw(mx, my)
+            #mx, my = IO.Mouse.position()
+            #self._mouse_cursor.draw(mx, my)
         else:
             self._levels[self._active_level].draw()
