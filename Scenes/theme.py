@@ -6,11 +6,22 @@ COLOR_WIN = (255, 147, 4)
 COLOR_FOOTPRINT = (81, 63, 39)
 COLOR_WARNING = (255, 0, 0)
 COLOR_GRAY = (149, 165, 166)
+COLOR_PURPLE = (204, 0, 255)
+COLOR_GREEN = (0, 255, 0)
 
 BONUSES_IMG = {
     "fp": "assets/Footprint.png",
     "blk": "assets/Lock.png",
-    "clk": "assets/Clock.png"
+    "clk": "assets/Clock.png",
+    "cube": "assets/cube.png",
+    "devil": "assets/devil.png",
+    "fprint": "assets/fprint.png",
+    "gear": "assets/gear.png",
+    "insect": "assets/insect.png",
+    "nuke": "assets/nuke.png",
+    "rotate": "assets/rotate.png",
+    "shape": "assets/shape.png",
+    "shuffle": "assets/shuffle.png"
 }
 
 SOUND_FX = {
