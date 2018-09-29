@@ -172,6 +172,11 @@ class Final(Game.SubScene):
                                     i = index
                                     break
 
+                    if l.disruptor.__class__.__name__ == "Reset":
+                        print("devil test")
+                        self._grid = Grid(self.lockers_data, disrupt=True)
+                        self._grid.initiate()
+
                     if l.disruptor:
                         if l.disruptor.__class__.__name__ == "Uptime":
                             self._elapsed_time = l.disruptor.trigger_effect(self._elapsed_time)
