@@ -278,8 +278,10 @@ class LockersMenu(Game.Scene):
     def draw(self):
         y_offset = int(self._final_animation_y_offset)
 
+        if self._final_animation_y_offset > 0:
+            self._emitter.draw()
+
         x_shake, y_shake = (0, 0)
-        self._emitter.draw()
         if self._launch_final_animation:
             x_shake, y_shake = (random.randint(-2, 2), random.randint(-2, 2))
 

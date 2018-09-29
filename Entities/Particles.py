@@ -28,7 +28,7 @@ class Particle(object):
             )
             return True
 
-    def get_color(self, darken=0.5):
+    def get_color(self, darken=0.8):
         r1, g1, b1 = self._color
         r2, g2, b2 = self._color2
         return (
