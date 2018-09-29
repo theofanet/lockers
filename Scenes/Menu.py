@@ -12,7 +12,7 @@ from .Final import Final
 from Entities.Bonuses.footprint import Footprint
 from Entities.Bonuses.block import Block
 from Entities.Bonuses.clock import Clock
-from Scenes.theme import BONUSES_IMG
+from Scenes.theme import BONUSES_IMG, COLOR_WIN, COLOR_DEFAULT
 
 from Entities.Particles import ParticleEmitter
 NB_LEVELS = 4
@@ -248,8 +248,7 @@ class LockersMenu(Game.Scene):
                     nnp = lp.sub(np)
                     l = p.sub(np).length()
                     nnp.normalize()
-                    print(l)
-                    if l > 15:
+                    if l > 50:
                         px = 150*lpx + 900 * nnp.x * (self._animation_time / 1000)
                         py = 150*lpy + 900 * nnp.y * (self._animation_time / 1000)
                         self._current_penta_point = (px, py)
@@ -320,7 +319,7 @@ class LockersMenu(Game.Scene):
                     pygame.draw.line(App.get_display(), RED_COLOR if not level.is_done else GREEN_COLOR, (int(x + 25) + x_shake, int(dy / 2) - y_offset + y_shake), (int(x2 - 25) + x_shake, int(dy / 2) - y_offset + y_shake))
 
                 # Drawing Bonus circles
-                pygame.draw.circle(App.get_display(), GRAY_COLOR if not level.is_done else YELLOW_COLOR, (bx + int(bxx) + x_shake, by + int(bh / 2) + y_shake), 25, 1)
+                pygame.draw.circle(App.get_display(), GRAY_COLOR if not level.is_done else COLOR_DEFAULT, (bx + int(bxx) + x_shake, by + int(bh / 2) + y_shake), 25, 1)
 
                 if level.is_done:
                     self._bonuses[i].draw(bx + int(bxx) + x_shake, by + int(bh / 2) + y_shake, at_center=True)

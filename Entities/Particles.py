@@ -5,7 +5,7 @@ import pygame
 
 
 class Particle(object):
-    def __init__(self, velocity, position, life=5, size=20, c=(237, 237, 237), c2=(0, 148, 50)):
+    def __init__(self, velocity, position, life=5, size=20, c=(18, 203, 196), c2=(0, 148, 50)):
         self._position = position
         self._life = life if life > 0 else 1
         self._size = size if size > 0 else 1
