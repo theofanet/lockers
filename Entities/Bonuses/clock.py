@@ -28,10 +28,13 @@ class Clock(Bonus):
                 self.active = False
             self._scene.active_bonus(self)
 
-    def draw(self, x, y, font):
-        self.img.set_color_t(COLOR_WIN if self.active else COLOR_DEFAULT).draw(x, y)
-        font.draw_text(
-            "%d" % (self.duration - (self.charge_start / 1000)),
-            (x + 60, y),
-            COLOR_WIN if self.active else COLOR_DEFAULT
-        )
+    def draw(self, x, y, font, check):
+        if check:
+            self.img.set_color_t(COLOR_WIN if self.active else COLOR_DEFAULT).draw(x, y)
+            font.draw_text(
+                "%d" % (self.duration - (self.charge_start / 1000)),
+                (x + 60, y),
+                COLOR_WIN if self.active else COLOR_DEFAULT
+            )
+        else:
+            self.img.set_color_t(COLOR_GRAY).draw(x, y)

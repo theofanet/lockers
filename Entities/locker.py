@@ -14,7 +14,7 @@ class Locker:
         self.direction_up = DIRECTION_UP
         self.direction_down = DIRECTION_DOWN
         self.blocked_triggered = False
-        self.l = lockers_data["l"]
+        self.l = lockers_data["h"]
         self.w = lockers_data["w"]
         self.selector = Selector(lockers_data)
         self.win_position = False

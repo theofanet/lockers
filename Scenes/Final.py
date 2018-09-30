@@ -6,7 +6,7 @@ import pygame
 
 
 LOCKERS_NB = 20
-LOCKERS_L = 10
+LOCKERS_H = 10
 LOCKERS_W = 40
 
 FP_CHARGE_DURATION = 5
@@ -42,7 +42,7 @@ class Final(Game.SubScene):
             self._sfx[k] = pygame.mixer.Sound(v)
 
         # generate grid.
-        self.lockers_data = {"nb": LOCKERS_NB, "l": LOCKERS_L, "w": LOCKERS_W}
+        self.lockers_data = {"nb": LOCKERS_NB, "h": LOCKERS_H, "w": LOCKERS_W}
         self._grid = None
 
         # generate progress bar.
@@ -57,7 +57,7 @@ class Final(Game.SubScene):
         # bonus.
         self._bonuses = bonuses
         self._active_bonuses = []
-        for bonus in self._bonuses:
+        for bonus, _ in self._bonuses:
             bonus.set_scene(self)
 
     def active_bonus(self, bonus):
@@ -72,28 +72,31 @@ class Final(Game.SubScene):
         self._set_state(STATE_WAIT)
         self._grid = Grid(self.lockers_data, disrupt=True)
         self._grid.initiate()
-        pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "l": self._grid.l, "w": 10}
+        pos_data = {"x": self._grid.x, "y": self._grid.y + 110, "h": self._grid.h, "w": 10}
         self._progress = Progress(pos_data)
         self._progress.initiate()
+        self._rz = False
 
         # bonuses.
-        for bonus in self._bonuses:
-            bonus.initiate()
+        for bonus, check in self._bonuses:
+            if check:
+                bonus.initiate()
 
-        self._sfx["amb4"].play()
+        self._sfx["amb5"].set_volume(0.3)
+        self._sfx["amb5"].play()
 
     def update(self):
         elapsed_time_s = self._elapsed_time / 1000
 
         # ####### TIMER #######
         # bonus.
-        for bonus in self._bonuses:
+        for bonus, _ in self._bonuses:
             bonus.update()
 
         # ####### ESC #######
         if IO.Keyboard.is_down(K_ESCAPE):
             self._scene.return_menu()
-            self._sfx["amb4"].stop()
+            self._sfx["amb5"].stop()
             self._sfx["rz"].stop()
 
         # ####### GENERAL #######
@@ -212,8 +215,8 @@ class Final(Game.SubScene):
             # draw bonuses.
             o_x, o_y = 200, 100
             i = 0
-            for bonus in self._bonuses:
-                bonus.draw(o_x + i * 70, o_y, self._fonts["perm"])
+            for bonus, check in self._bonuses:
+                bonus.draw(o_x + i * 70, o_y, self._fonts["perm"], check)
                 i += 1
 
             # draw grid.
@@ -244,7 +247,7 @@ class Final(Game.SubScene):
                          (probe_x+15, probe_y-5),
                          (probe_x+10, probe_y))
                 pygame.draw.polygon(App.get_display(), COLOR_WIN if locker.win_position else COLOR_DEFAULT, probe, 1)
-                probe_modifier += self.lockers_data["l"] * self._grid.scale
+                probe_modifier += self.lockers_data["h"] * self._grid.scale
 
                 # selector.
                 if index == self._grid.selected_locker:
@@ -258,6 +261,7 @@ class Final(Game.SubScene):
 
                 # sound effects.
                 if not self._rz:
+                    self._sfx["rz"].set_volume(0.3)
                     self._sfx["rz"].play()
                     self._rz = True
             else:

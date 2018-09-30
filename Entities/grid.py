@@ -22,15 +22,15 @@ class Grid:
         self._lockers_data = lockers_data
 
         # grid attributes.
-        self.l = self._lockers_data["nb"] * self._lockers_data["l"] * self.scale
+        self.h = self._lockers_data["nb"] * self._lockers_data["h"] * self.scale
         self.w = self._lockers_data["w"] * 2
         self.y = (self._screen_y / 2) - (self.w / 2)
-        self.x = (self._screen_x / 2) - (self.l / 2)
+        self.x = (self._screen_x / 2) - (self.h / 2)
         self.rect = None
         self._disrupt = disrupt
 
         # global start position.
-        self.start_pos = (self._screen_x / 2) + (self.l / 2)
+        self.start_pos = (self._screen_x / 2) + (self.h / 2) - self._lockers_data["h"]
 
         # lockers grid attributes.
         self.lockers_list = [Locker(lockers_data) for _ in range(self._lockers_data["nb"])]
@@ -47,8 +47,8 @@ class Grid:
 
     def initiate(self, mixed=False):
         # set locker and selector modifiers.
-        locker_modifier = self._lockers_data["l"] * 1.5
-        selector_modifier = self._lockers_data["l"] * 1.7
+        locker_modifier = self._lockers_data["h"] * 1.5
+        selector_modifier = self._lockers_data["h"] * 1.7
 
         # disruptors.
         if self._disrupt:
@@ -123,11 +123,11 @@ class Grid:
                     locker.disruptor.y = self._screen_y / 2 - (locker.w * 3.2)
 
             # iterate next modifiers.
-            locker_modifier += self._lockers_data["l"] * self.scale
-            selector_modifier += self._lockers_data["l"] * self.scale
+            locker_modifier += self._lockers_data["h"] * self.scale
+            selector_modifier += self._lockers_data["h"] * self.scale
 
         # define grid rect.
-        self.rect = pygame.Rect(self.x, self.y, self.l, self.w)
+        self.rect = pygame.Rect(self.x, self.y, self.h, self.w)
 
     def next_locker(self, current_index, jump=False):
         if jump:

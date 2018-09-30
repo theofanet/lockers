@@ -42,10 +42,13 @@ class Bonus(object):
                 self.charge_start = App.get_time()
                 self._scene.active_bonus(self)
 
-    def draw(self, x, y, font):
-        self.img.set_color_t(COLOR_WIN if self.active else COLOR_DEFAULT).draw(x, y)
-        font.draw_text(
-            "%s" % self.charges_left,
-            (x + 60, y),
-            COLOR_WIN if self.active else COLOR_DEFAULT
-        )
+    def draw(self, x, y, font, check):
+        if check:
+            self.img.set_color_t(COLOR_WIN if self.active else COLOR_DEFAULT).draw(x, y)
+            font.draw_text(
+                "%s" % self.charges_left,
+                (x + 60, y),
+                COLOR_WIN if self.active else COLOR_DEFAULT
+            )
+        else:
+            self.img.set_color_t(COLOR_GRAY).draw(x, y)

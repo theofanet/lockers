@@ -29,6 +29,7 @@ SOUND_FX = {
     "amb2": "assets/sounds/amb_2.wav",
     "amb3": "assets/sounds/amb_3.wav",
     "amb4": "assets/sounds/amb_4.wav",
+    "amb5": "assets/sounds/amb_4.wav",
     "click": "assets/sounds/click_1.wav",
     "trig": "assets/sounds/trigger_1.wav",
     "rz": "assets/sounds/red_zone.wav"

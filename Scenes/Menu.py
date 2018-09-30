@@ -170,27 +170,40 @@ class LockersMenu(Game.Scene):
             Render.Font("assets/fonts/IMPOS-30.ttf", 20)
         ]
 
-        #App.show_cursor(False)
+        # App.show_cursor(False)
         self._mouse_cursor = Render.Image("assets/cursor.png", scale=0.05)
 
+        # TODO: changer les bool par le score load "is_done".
         self._levels = [
-            LockerLevel(Locker1(), 0),
+            LockerLevel(Locker1([
+                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), False],
+                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), False],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
+            ]), 0),
             LockerLevel(Locker2([
-                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q)
+                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
+                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), False],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
             ]), 1),
             LockerLevel(Locker3([
-                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
-                Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w)
+                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
+                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), True],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
             ]), 2),
             LockerLevel(Locker4([
-                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
-                Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
-                Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
+                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
+                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), True],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), True],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
             ]), 3),
             LockerLevel(Final([
-                Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q),
-                Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w),
-                Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e)
+                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
+                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), True],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), True],
+                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), True]
             ]), 3)
         ]
 
@@ -309,7 +322,6 @@ class LockersMenu(Game.Scene):
 
         if IO.Keyboard.is_down(K_ESCAPE):
             App.exit()
-
 
     def activate_level(self, index, master_scene):
         self._active_level = index
