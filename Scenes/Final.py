@@ -107,6 +107,7 @@ class Final(Game.SubScene):
             # win condition check.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
                 self._set_state(STATE_WIN)
+                self._sfx["clap2"].play(0)
                 self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
 
             # selected locker.
@@ -216,14 +217,14 @@ class Final(Game.SubScene):
             o_x, o_y = 200, 100
             i = 0
             for bonus, check in self._bonuses:
-                bonus.draw(o_x + i * 70, o_y, self._fonts["perm"], check)
+                bonus.draw(o_x + i * 80, o_y, self._fonts["perm"], check)
                 i += 1
 
             # draw grid.
             pygame.draw.rect(App.get_display(), COLOR_DEFAULT, self._grid, 1)
 
             # draw lockers / footprints / probes / selectors.
-            probe_modifier = self.lockers_data["l"] * 1.5
+            probe_modifier = self.lockers_data["h"] * 1.5
             for index in range(len(self._grid.lockers_list)):
                 # lockers & footprints.
                 locker = self._grid.lockers_list[index]
@@ -271,10 +272,10 @@ class Final(Game.SubScene):
         elif self._state == STATE_WIN:
                 score = MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000))
                 self._fonts["perm"].draw_text("%.2f" % score, (mid_x - (mid_x / 2), mid_y), COLOR_DEFAULT)
-                self._bonuses_img["clk"].draw(mid_x - (mid_x / 2) + 60, mid_y - 40)
-                self._fonts["perm"].draw_text("Stop timer unlocked !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
+                self._fonts["perm"].draw_text("Congratulations !", (mid_x - (mid_x / 2) + 180, mid_y), COLOR_WIN)
 
                 # sound effects.
+                self._sfx["clap1"].play()
                 self._sfx["amb4"].fadeout(6000)
         # loosing case.
         else:

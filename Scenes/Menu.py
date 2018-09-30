@@ -12,7 +12,8 @@ from .Final import Final
 from Entities.Bonuses.footprint import Footprint
 from Entities.Bonuses.block import Block
 from Entities.Bonuses.clock import Clock
-from Scenes.theme import BONUSES_IMG, COLOR_WIN, COLOR_DEFAULT
+from Entities.Bonuses.hack import Hack
+from Scenes.theme import BONUSES_IMG, COLOR_WIN, COLOR_DEFAULT, SOUND_FX
 
 from Entities.Particles import ParticleEmitter
 NB_LEVELS = 4
@@ -30,6 +31,7 @@ PENTA = [
     (-0.951, -0.309),
     (0.588, 0.809)
 ]
+
 
 class LockerLevel(object):
     def __init__(self, scene, index):
@@ -117,6 +119,12 @@ class LockersMenu(Game.Scene):
         self._current_penta_point = (0, 0)
         self._animation_time = 0
         dx, dy = App.get_screen_size()
+        self._sfx_amb = pygame.mixer.Sound(SOUND_FX["menu"])
+        self._sfx_amb = pygame.mixer.Sound(SOUND_FX["menu"])
+        self._sfx_move = pygame.mixer.Sound(SOUND_FX["click"])
+        self._sfx_return = pygame.mixer.Sound(SOUND_FX["beeps"])
+        self._sfx_return.set_volume(0.3)
+        self._sfx_alert = pygame.mixer.Sound(SOUND_FX["alert"])
 
         self._emitter = ParticleEmitter((-20, dy + 20), 500, (0, -50), life=1.5, size=20)
         self._emitter.set_ranges(x_range=(0, dx/4+20), life=(0, 2), size=(-10, 10), direction_x=(-20, 20), direction_y=(-50, 0))
@@ -129,6 +137,7 @@ class LockersMenu(Game.Scene):
 
     def return_menu(self):
         self._active_level = None
+        self._sfx_amb.play(-1)
 
     def load_scores(self):
         try:
@@ -176,34 +185,114 @@ class LockersMenu(Game.Scene):
         # TODO: changer les bool par le score load "is_done".
         self._levels = [
             LockerLevel(Locker1([
-                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), False],
-                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), False],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
+                [Footprint(
+                    Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["swipe"],
+                    None,
+                    K_q), False],
+                [Block(
+                    Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["lck_u"],
+                    SOUND_FX["lck_d"],
+                    K_w), False],
+                [Clock(
+                    Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["tic"],
+                    None,
+                    K_e), False],
+                [Hack(
+                    Render.Image(BONUSES_IMG['handle'], scale=0.5, color=GRAY_COLOR),
+                    None,
+                    None,
+                    K_r), False]
             ]), 0),
             LockerLevel(Locker2([
-                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
-                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), False],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
+                [Footprint(
+                    Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["swipe"],
+                    None,
+                    K_q), True],
+                [Block(
+                    Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["lck_u"],
+                    SOUND_FX["lck_d"],
+                    K_w), False],
+                [Clock(
+                    Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["tic"],
+                    None,
+                    K_e), False],
+                [Hack(
+                    Render.Image(BONUSES_IMG['handle'], scale=0.5, color=GRAY_COLOR),
+                    None,
+                    None,
+                    K_r), False]
             ]), 1),
             LockerLevel(Locker3([
-                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
-                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), True],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
+                [Footprint(
+                    Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["swipe"],
+                    None,
+                    K_q), True],
+                [Block(
+                    Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["lck_u"],
+                    SOUND_FX["lck_d"],
+                    K_w), True],
+                [Clock(
+                    Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["tic"],
+                    None,
+                    K_e), False],
+                [Hack(
+                    Render.Image(BONUSES_IMG['handle'], scale=0.5, color=GRAY_COLOR),
+                    None,
+                    None,
+                    K_r), False]
             ]), 2),
             LockerLevel(Locker4([
-                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
-                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), True],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), True],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), False]
+                [Footprint(
+                    Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["swipe"],
+                    None,
+                    K_q), True],
+                [Block(
+                    Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["lck_u"],
+                    SOUND_FX["lck_d"],
+                    K_w), True],
+                [Clock(
+                    Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["tic"],
+                    None,
+                    K_e), True],
+                [Hack(
+                    Render.Image(BONUSES_IMG['handle'], scale=0.5, color=GRAY_COLOR),
+                    None,
+                    None,
+                    K_r), False]
             ]), 3),
             LockerLevel(Final([
-                [Footprint(Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR), K_q), True],
-                [Block(Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR), K_w), True],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), True],
-                [Clock(Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR), K_e), True]
+                [Footprint(
+                    Render.Image(BONUSES_IMG['fp'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["swipe"],
+                    None,
+                    K_q), True],
+                [Block(
+                    Render.Image(BONUSES_IMG['blk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["lck_u"],
+                    SOUND_FX["lck_d"],
+                    K_w), True],
+                [Clock(
+                    Render.Image(BONUSES_IMG['clk'], scale=0.5, color=GRAY_COLOR),
+                    SOUND_FX["tic"],
+                    None,
+                    K_e), True],
+                [Hack(
+                    Render.Image(BONUSES_IMG['handle'], scale=0.5, color=GRAY_COLOR),
+                    None,
+                    None,
+                    K_r), True]
             ]), 3)
         ]
 
@@ -211,12 +300,14 @@ class LockersMenu(Game.Scene):
             Render.Image(BONUSES_IMG['fp'], scale=0.273, color=GRAY_COLOR),
             Render.Image(BONUSES_IMG['blk'], scale=0.273, color=GRAY_COLOR),
             Render.Image(BONUSES_IMG['clk'], scale=0.273, color=GRAY_COLOR),
-            Render.Image("assets/Clock.png", scale=0.273, color=GRAY_COLOR)
+            Render.Image(BONUSES_IMG['handle'], scale=0.273, color=GRAY_COLOR)
         ]
 
         self._cursor = MenuCursor()
 
         self.load_scores()
+
+        self._sfx_amb.play(-1)
 
     def update(self):
         self._elapsed_time += App.get_time()
@@ -304,15 +395,22 @@ class LockersMenu(Game.Scene):
 
             if IO.Keyboard.is_down(K_LEFT):
                 if cursor_index > 0:
+                    self._sfx_move.play()
                     self._cursor.set_index(cursor_index - 1)
             elif IO.Keyboard.is_up(K_RIGHT):
                 if cursor_index < NB_LEVELS - 1 and self._levels[cursor_index].is_done:
+                    self._sfx_move.play()
                     self._cursor.set_index(cursor_index + 1)
                 elif cursor_index == NB_LEVELS - 1 and self._levels[cursor_index].is_done and self._current_penta_line >= 6:
+                    self._sfx_move.play()
                     self._cursor.set_index(cursor_index + 1)
             elif IO.Keyboard.is_down(K_RETURN):
+                self._sfx_return.play()
+                self._sfx_amb.fadeout(1000)
                 self.activate_level(cursor_index, self)
             elif IO.Keyboard.is_down(K_a):
+                self._sfx_alert.play(0, fade_ms=1000)
+                self._sfx_alert.fadeout(5000)
                 self._launch_final_animation = True
                 self._final_animation_y_offset = 0
                 self._animation_time = 0
@@ -321,6 +419,8 @@ class LockersMenu(Game.Scene):
                 self._final_animation_circle_radius = 0
 
         if IO.Keyboard.is_down(K_ESCAPE):
+            self._sfx_amb.stop()
+            self._sfx_alert.stop()
             App.exit()
 
     def activate_level(self, index, master_scene):

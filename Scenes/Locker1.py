@@ -76,9 +76,9 @@ class Locker1(Game.SubScene):
             self._elapsed_time += App.get_time()
 
             # win condition check.
-            print(self._grid.locker_win_nb)
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
                 self._set_state(STATE_WIN)
+                self._sfx["clap2"].play(0)
                 self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
 
             # selected locker.
@@ -135,7 +135,7 @@ class Locker1(Game.SubScene):
             o_x, o_y = 200, 100
             i = 0
             for bonus, check in self._bonuses:
-                bonus.draw(o_x + i * 70, o_y, self._fonts["perm"], check)
+                bonus.draw(o_x + i * 80, o_y, self._fonts["perm"], check)
                 i += 1
 
             # draw grid.

@@ -101,6 +101,7 @@ class Locker3(Game.SubScene):
             # win condition check.
             if self._grid.locker_win_nb == self.lockers_data["nb"]:
                 self._set_state(STATE_WIN)
+                self._sfx["clap2"].play(0)
                 self._scene.level_complete(MAX_TIMER - (MAX_TIMER - (self._elapsed_time / 1000)))
 
             # selected locker.
@@ -129,6 +130,9 @@ class Locker3(Game.SubScene):
                 # move to next locker.
                 if not l.blocked_triggered or "Block" in self._active_bonuses:
                     self._grid.next_locker(i)
+                else:
+                    self._sfx["bip"].set_volume(0.3)
+                    self._sfx["bip"].play()
 
             # ####### DOWN #######
             elif IO.Keyboard.is_down(K_DOWN):
@@ -147,6 +151,9 @@ class Locker3(Game.SubScene):
                 # move to next locker.
                 if not l.blocked_triggered or "Block" in self._active_bonuses:
                     self._grid.next_locker(i)
+                else:
+                    self._sfx["bip"].set_volume(0.3)
+                    self._sfx["bip"].play()
 
     def draw(self, camera=None, screen=None):
         mid_x = self._screen_x / 2
@@ -163,7 +170,7 @@ class Locker3(Game.SubScene):
             o_x, o_y = 200, 100
             i = 0
             for bonus, check in self._bonuses:
-                bonus.draw(o_x + i * 70, o_y, self._fonts["perm"], check)
+                bonus.draw(o_x + i * 80, o_y, self._fonts["perm"], check)
                 i += 1
 
             # draw grid.
@@ -224,4 +231,4 @@ class Locker3(Game.SubScene):
             self._fonts["perm"].draw_text("Try again !", (mid_x - (mid_x / 8), mid_y), COLOR_WARNING)
 
             # sound effects.
-            self._sfx["amb3"].fadeout(4000)
+            # self._sfx["amb3"].fadeout(4000)
